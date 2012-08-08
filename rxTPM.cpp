@@ -11,134 +11,97 @@ using std::ios;
 
 #include "include.h"
 
-int rxTPM::M;
-int rxTPM::N;
-
-vector< vector<int> > **rxTPM::t2s;
-int *****rxTPM::s2t;
+vector< vector<int> > *rxTPM::t2s;
+int ****rxTPM::s2t;
 
 /**
  * initialize the static variables and allocate and initialize the static lists
- * @param M_in nr of sp orbs
- * @param N_in nr of particles
  */
-void rxTPM::init(int M_in,int N_in){
+void rxTPM::init(){
 
-   M = M_in;
-   N = N_in;
+   t2s = new vector< vector<int> > [2];//2 types of dp spin
 
-   //allocate
-   t2s = new vector< vector<int> > * [M];
+   s2t = new int *** [2];
 
-   for(int k = 0;k < M;++k)
-      t2s[k] = new vector< vector<int> > [2];
+   for(int S = 0;S < 2;++S){
 
-   s2t = new int **** [M];
+      s2t[S] = new int ** [2];
 
-   for(int k = 0;k < M;++k){
+      for(int S_ab = 0;S_ab < 2;++S_ab){
 
-      s2t[k] = new int *** [2];
+         s2t[S][S_ab] = new int * [Tools::gL()];
 
-      for(int S = 0;S < 2;++S){
-
-         s2t[k][S] = new int ** [2];
-
-         for(int S_ab = 0;S_ab < 2;++S_ab){
-
-            s2t[k][S][S_ab] = new int * [M];
-
-            for(int a = 0;a < M;++a)
-               s2t[k][S][S_ab][a] = new int [M];
-
-         }
+         for(int a = 0;a < Tools::gL();++a)
+            s2t[S][S_ab][a] = new int [Tools::gL()];
 
       }
-
    }
 
    vector<int> v(3);
 
-   int tp;
+   int tp = 0;
 
-   for(int k = 0;k < M;++k){
+   //S == 1/2
+   for(int S_ab = 0;S_ab < 2;++S_ab){
 
-      tp = 0;
+      for(int a = 0;a < Tools::gL();++a)
+         for(int b = a + S_ab;b < Tools::gL();++b){
 
-      //S == 1/2
-      for(int S_ab = 0;S_ab < 2;++S_ab){
+            if(a == b){
 
-         for(int a = 0;a < M;++a)
-            for(int b = a + S_ab;b < M;++b){
-
-               if(a == b){
-
-                  if(a != k){
-
-                     v[0] = S_ab;//S_ab
-                     v[1] = a;
-                     v[2] = b;
-
-                     t2s[k][0].push_back(v);
-
-                     s2t[k][0][S_ab][a][b] = tp;
-                     s2t[k][0][S_ab][b][a] = tp;
-
-                     ++tp;
-
-                  }
-
-               }
-               else{
+               if(a != 0){
 
                   v[0] = S_ab;//S_ab
                   v[1] = a;
                   v[2] = b;
 
-                  t2s[k][0].push_back(v);
+                  t2s[0].push_back(v);
 
-                  s2t[k][0][S_ab][a][b] = tp;
-                  s2t[k][0][S_ab][b][a] = tp;
+                  s2t[0][S_ab][a][b] = tp;
+                  s2t[0][S_ab][b][a] = tp;
 
                   ++tp;
+
                }
 
             }
+            else{
 
-      }
+               v[0] = S_ab;//S_ab
+               v[1] = a;
+               v[2] = b;
 
-      tp = 0;
+               t2s[0].push_back(v);
 
-      //S == 3/2
-      for(int a = 0;a < M;++a){
+               s2t[0][S_ab][a][b] = tp;
+               s2t[0][S_ab][b][a] = tp;
 
-         if(a == k)
-            ++a;
-
-         if(a == M)
-            break;
-
-         for(int b = a + 1;b < M;++b){
-
-            if(b == k)
-               ++b;
-
-            if(b == M)
-               break;
-
-            v[0] = 1;//S_ab
-            v[1] = a;
-            v[2] = b;
-
-            t2s[k][1].push_back(v);
-
-            s2t[k][1][1][a][b] = tp;
-            s2t[k][1][1][b][a] = tp;
-
-            ++tp;
+               ++tp;
+            }
 
          }
-      }
 
+   }
+
+   tp = 0;
+
+   //S == 3/2
+   for(int a = 1;a < Tools::gL();++a){
+
+      for(int b = a + 1;b < Tools::gL();++b){
+
+         v[0] = 1;//S_ab
+         v[1] = a;
+         v[2] = b;
+
+         t2s[1].push_back(v);
+
+         s2t[1][1][a][b] = tp;
+         s2t[1][1][b][a] = tp;
+
+         ++tp;
+
+      }
    }
 
 }
@@ -148,29 +111,20 @@ void rxTPM::init(int M_in,int N_in){
  */
 void rxTPM::clear(){
 
-   for(int k = 0;k < M;++k)
-      delete [] t2s[k];
-
    delete [] t2s;
 
-   for(int k = 0;k < M;++k){
+   for(int S = 0;S < 2;++S){
 
-      for(int S = 0;S < 2;++S){
+      for(int S_ab = 0;S_ab < 2;++S_ab){
 
-         for(int S_ab = 0;S_ab < 2;++S_ab){
+         for(int a = 0;a < Tools::gL();++a)
+            delete [] s2t[S][S_ab][a];
 
-            for(int a = 0;a < M;++a)
-               delete [] s2t[k][S][S_ab][a];
-
-            delete [] s2t[k][S][S_ab];
-
-         }
-
-         delete [] s2t[k][S];
+         delete [] s2t[S][S_ab];
 
       }
 
-      delete [] s2t[k];
+      delete [] s2t[S];
 
    }
 
@@ -180,14 +134,11 @@ void rxTPM::clear(){
 
 /**
  * standard constructor, constructs two blocks, the S = 1/2 and S = 3/2
- * @param l the parameter l that determines which spatial sp indices are blocked out
  */
-rxTPM::rxTPM(int l) : BlockMatrix(2) {
+rxTPM::rxTPM() : BlockMatrix(2) {
 
-   this->l = l;
-
-   this->setMatrixDim(0,t2s[l][0].size(),2);
-   this->setMatrixDim(1,t2s[l][1].size(),4);
+   this->setMatrixDim(0,t2s[0].size(),2);
+   this->setMatrixDim(1,t2s[1].size(),4);
 
 }
 
@@ -195,11 +146,8 @@ rxTPM::rxTPM(int l) : BlockMatrix(2) {
  * copy constructor: constructs Matrix object and fills it with the content of blockmatrix rxtpm_c
  * @param rxtpm_c object that will be copied into this.
  */
-rxTPM::rxTPM(const rxTPM &rxtpm_c) : BlockMatrix(rxtpm_c){ 
+rxTPM::rxTPM(const rxTPM &rxtpm_c) : BlockMatrix(rxtpm_c){ }
 
-   this->l = rxtpm_c.gl();
-
-}
 /**
  * destructor
  */
@@ -216,11 +164,9 @@ ostream &operator<<(ostream &output,const rxTPM &rxtpm_p){
       for(int i = 0;i < rxtpm_p.gdim(S);++i)
          for(int j = 0;j < rxtpm_p.gdim(S);++j){
 
-            output << i << "\t" << j << "\t|\t(" << rxtpm_p.t2s[rxtpm_p.gl()][S][i][0] << ")\t" << rxtpm_p.t2s[rxtpm_p.gl()][S][i][1] << "\t" << rxtpm_p.t2s[rxtpm_p.gl()][S][i][2]
-
-               << "\t;\t(" << rxtpm_p.t2s[rxtpm_p.gl()][S][j][0] << ")\t" << rxtpm_p.t2s[rxtpm_p.gl()][S][j][1] << "\t" << rxtpm_p.t2s[rxtpm_p.gl()][S][j][2] << "\t" 
-
-               << rxtpm_p[S](i,j) << endl;
+            output << i << "\t" << j << "\t|\t(" << rxtpm_p.t2s[S][i][0] << ")\t" << rxtpm_p.t2s[S][i][1] << "\t" << rxtpm_p.t2s[S][i][2] << "\t;\t("
+            
+            << rxtpm_p.t2s[S][j][0] << ")\t" << rxtpm_p.t2s[S][j][1] << "\t" << rxtpm_p.t2s[S][j][2] << "\t" << rxtpm_p[S](i,j) << endl;
 
          }
 
@@ -231,102 +177,52 @@ ostream &operator<<(ostream &output,const rxTPM &rxtpm_p){
 }
 
 /**
- * @return number of particles
- */
-int rxTPM::gN() const{
-
-   return N;
-
-}
-
-/**
- * @return number of sp orbitals
- */
-int rxTPM::gM() const{
-
-   return M;
-
-}
-
-/**
- * @return the parameter l
- */
-int rxTPM::gl() const{
-
-   return l;
-
-}
-
-/**
- * @param k which type is the rxTPM
  * @param S the dp spin
  * @param i the tp index
  * @param option == 0 return a, == 1 return b
- * @return the sp indices corresponding to the tp index i with parameter l
+ * @return the sp indices corresponding to the tp index i
  */
-int rxTPM::gt2s(int k,int S,int i,int option){
+int rxTPM::gt2s(int S,int i,int option){
 
-   return t2s[k][S][i][option];
+   return t2s[S][i][option];
 
 }
 
 /**
- * @param k which type is the rxTPM
  * @param S the dp spin
  * @param S_ab intermediate spin
  * @param a the first sp index
  * @param b the second sp index
- * @return the tp index corresponding to the sp indices a and b with parameter l
+ * @return the tp index corresponding to the sp indices a and b
  */
-int rxTPM::gs2t(int k,int S,int S_ab,int a,int b){
+int rxTPM::gs2t(int S,int S_ab,int a,int b){
 
-   return s2t[k][S][S_ab][a][b];
+   return s2t[S][S_ab][a][b];
 
 }
 
 /**
- * test if basis is correctly constructed
+ * pseudo invert the S = 1/2 block using n zero eigenvalues and invert the S = 3/2 block using m zero eigenvalues
+ * @param n the number of zero eigenvalues in the S = 1/2 block
+ * @param m the number of zero eigenvalues in the S = 3/2 block
  */
-void rxTPM::print_basis(){
+void rxTPM::pseudo_invert(int n,int m){
 
-   for(int k = 0;k < M;++k){
-
-      cout << endl;
-      cout << "l =\t" << k << endl;
-      cout << endl;
-
-      for(int S = 0;S < 2;++S){
-
-         cout << endl;
-         cout << "S =\t" << 2*S + 1 << "/" << 2 << endl;
-         cout << endl;
-
-         for(unsigned int i = 0;i < t2s[k][S].size();++i)
-            cout << i << "\t|\t(" << t2s[k][S][i][0] << ")\t" << t2s[k][S][i][1] << "\t" << t2s[k][S][i][2] << endl;
-
-      }
-
-   }
+   (*this)[0].pseudo_invert(n);
+   (*this)[1].pseudo_invert(m);
 
 }
 
 /**
- * pseudo invert the S = 1/2 block using M-1 zero eigenvalues and invert the S = 3/2 block
+ * take the positive or negative pseudo square root of the S = 1/2 block using n zero eigenvalues 
+ * and the same for the S = 3/2 block with m zero eigenvalues
+ * @param option if -1 inverse square root, if 1 regular square root
+ * @param n the number of zero eigenvalues in the S = 1/2 block
+ * @param m the number of zero eigenvalues in the S = 3/2 block
  */
-void rxTPM::pseudo_invert(){
+void rxTPM::pseudo_sqrt(int option,int n,int m){
 
-   (*this)[0].pseudo_invert(M - 1);
-   (*this)[1].invert();
-
-}
-
-/**
- * take the positive or negative pseudo square root of the S = 1/2 block using M-1 zero eigenvalues 
- * and the regular pos or min square root of S = 3/2 block
- */
-void rxTPM::pseudo_sqrt(int option){
-
-   (*this)[0].pseudo_sqrt(option,M - 1);
-   (*this)[1].sqrt(option);
+   (*this)[0].pseudo_sqrt(option,n);
+   (*this)[1].pseudo_sqrt(option,m);
 
 }

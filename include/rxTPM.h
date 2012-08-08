@@ -10,13 +10,12 @@ using std::vector;
 
 #include "Matrix.h"
 
-class dDPM;
-
 /**
  * @author Brecht Verstichel
- * @date 29-09-2011\n\n
+ * @date 08-08-2012\n\n
  * This class rxTPM is a class written for the blocks of the dDPM matrices, it is called rxTPM because it is a reduced expansion of a TPM matrix.
  * expanded for the same reason as xTPM and reduced because there is an extra parameter l which the sp indices cannot be equal to in the S = 3/2 block.
+ * This is written for translationally invariant dDPM matrices, so the only the l = 0 part is stored.
  */
 class rxTPM : public BlockMatrix {
 
@@ -30,7 +29,7 @@ class rxTPM : public BlockMatrix {
    public:
       
       //constructor
-      rxTPM(int);
+      rxTPM();
 
       //copy constructor
       rxTPM(const rxTPM &);
@@ -42,45 +41,25 @@ class rxTPM : public BlockMatrix {
 
       using BlockMatrix::operator();
 
-      //geef N terug
-      int gN() const;
+      void pseudo_invert(int,int);
 
-      //geef M terug
-      int gM() const;
+      void pseudo_sqrt(int,int,int);
 
-      //geef l terug
-      int gl() const;
-
-      void pseudo_invert();
-
-      void pseudo_sqrt(int);
-
-      static void init(int,int);
+      static void init();
 
       static void clear();
 
-      static int gt2s(int,int,int,int);
+      static int gt2s(int,int,int);
 
-      static int gs2t(int,int,int,int,int);
-
-      static void print_basis();
+      static int gs2t(int,int,int,int);
 
    private:
 
-      //!static list that takes in a paramater l, a dp-spinindex S and a tp index i and returns two sp indices a and b and intermediate spin S_ab
-      static vector< vector<int> > **t2s;
+      //!static list that takes a dp-spinindex S and a tp index i and returns two sp indices a and b and intermediate spin S_ab
+      static vector< vector<int> > *t2s;
 
-      //!static list that takes in a parameter l, a dp-spinindex S, intermediate spin S_ab and two sp indices a,b and returns a tp index i
-      static int *****s2t;
-
-      //!parameter l, sp index that is blocked out from the a = b part.
-      int l;
-
-      //!nr of particles
-      static int N;
-
-      //!dimension of sp hilbert space
-      static int M;
+      //!static list that takes in a dp-spinindex S, an intermediate spin S_ab and two sp indices a,b and returns a tp index i
+      static int ****s2t;
 
 };
 

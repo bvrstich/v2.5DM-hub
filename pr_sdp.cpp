@@ -41,7 +41,7 @@ int main(void){
 
    Tools::init(L,N);
 
-   rxTPM::init(L,N);
+   rxTPM::init();
 /*
    //hamiltoniaan
    dDPM ham;
