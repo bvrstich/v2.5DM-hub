@@ -292,8 +292,164 @@ void dDPM::proj_W(){
       }
 
    }
-   /*
+
    //then 2 equalities, first ( a = c ; b = d ) W^l_{ab;ab} <--> W^a_{lb;lb} <--> W^b_{al;al}
+   for(int a = 1;a < Tools::gL();++a){
+
+      for(int b = a + 1;b < Tools::gL();++b){
+
+         if(Tools::par(a) == b && Tools::shift(b,a) == a){//then the elements are mappen onto themselves
+
+            //first store the elements
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd)
+                  mat[S_ab][S_cd] = (*this)(0,S_ab,a,b,S_cd,a,b);
+
+            //first calculate the avarage:
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = S_ab;S_cd < 2;++S_cd){
+
+                  double ward = mat[S_ab][S_cd];
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                        ward += std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) )
+
+                           * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (1 - 2*S_lb) * (1 - 2*S_ld) * mat[S_lb][S_ld];
+
+                     }
+
+                  for(int S_al = 0;S_al < 2;++S_al)
+                     for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                        ward += std::sqrt( (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_al)
+
+                           * Tools::g6j(0,0,S_cd,S_cl)  * (1 - 2*S_ab) * (1 - 2*S_cd) * mat[S_al][S_cl];
+
+                     }
+
+                  i = rxTPM::gs2t(0,S_ab,a,b);
+                  j = rxTPM::gs2t(0,S_cd,a,b);
+
+                  (*this)(0,i,j) = ward/3.0;
+                  (*this)(0,j,i) = (*this)(0,i,j);
+
+               }
+
+         }
+         else{
+
+            //first calculate the avarage:
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = S_ab;S_cd < 2;++S_cd){
+
+                  double ward = (*this)(0,S_ab,a,b,S_cd,a,b);
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                        ward += std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) )
+
+                           * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(a,0,S_lb,0,b,S_ld,0,b);
+
+                     }
+
+                  for(int S_al = 0;S_al < 2;++S_al)
+                     for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                        ward += std::sqrt( (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_al)
+
+                           * Tools::g6j(0,0,S_cd,S_cl) * (1 - 2*S_al) * (1 - 2*S_cl) * (1 - 2*S_ab) * (1 - 2*S_cd) * (*this)(b,0,S_al,a,0,S_cl,a,0);
+
+                     }
+
+                  i = rxTPM::gs2t(0,S_ab,a,b);
+                  j = rxTPM::gs2t(0,S_cd,a,b);
+
+                  (*this)(0,i,j) = ward/3.0;
+                  (*this)(0,j,i) = (*this)(0,i,j);
+
+               }
+
+            //then make the rest symmetric
+            for(int S_lb = 0;S_lb < 2;++S_lb)
+               for(int S_ld = S_lb;S_ld < 2;++S_ld){
+
+                  i = rxTPM::gs2t(0,S_lb,Tools::par(a),Tools::shift(b,a));
+                  j = rxTPM::gs2t(0,S_ld,Tools::par(a),Tools::shift(b,a));
+
+                  if(Tools::par(a) > Tools::shift(b,a)){
+
+                     phase_i = 1 - 2*S_lb;
+                     phase_j = 1 - 2*S_ld;
+
+                  }
+                  else{
+
+                     phase_i = 1;
+                     phase_j = 1;
+
+                  }
+
+                  (*this)(0,i,j) = 0.0;
+
+                  for(int S_ab = 0;S_ab < 2;++S_ab)
+                     for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                        (*this)(0,i,j) += phase_i * phase_j * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) ) 
+
+                           * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(0,S_ab,a,b,S_cd,a,b);
+
+                     }
+
+                  (*this)(0,j,i) = (*this)(0,i,j);
+
+               }
+
+            for(int S_al = 0;S_al < 2;++S_al)
+               for(int S_cl = S_al;S_cl < 2;++S_cl){
+
+                  i = rxTPM::gs2t(0,S_al,Tools::shift(a,b),Tools::par(b));
+                  j = rxTPM::gs2t(0,S_cl,Tools::shift(a,b),Tools::par(b));
+
+                  if(Tools::shift(a,b) > Tools::par(b)){
+
+                     phase_i = 1 - 2*S_al;
+                     phase_j = 1 - 2*S_cl;
+
+                  }
+                  else{
+
+                     phase_i = 1;
+                     phase_j = 1;
+
+                  }
+
+                  (*this)(0,i,j) = 0.0;
+
+                  for(int S_ab = 0;S_ab < 2;++S_ab)
+                     for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                        (*this)(0,i,j) += phase_i * phase_j * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) ) * 
+
+                           (1 - 2*S_ab) * (1 - 2*S_cd) * (1 - 2*S_al) * (1 - 2*S_cl) 
+
+                           * Tools::g6j(0,0,S_ab,S_al) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(0,S_ab,a,b,S_cd,a,b);
+
+                     }
+
+                  (*this)(0,j,i) = (*this)(0,i,j);
+
+               }
+
+         }
+
+      }
+   }
+
+   /*
+   //next with two equalities:
    for(int a = 0;a < M;++a){
 
    if(a == l)
@@ -302,74 +458,68 @@ void dDPM::proj_W(){
    if(a == M)
    break;
 
-   for(int b = a + 1;b < M;++b){
+//a = d and  b = l: W^l_{al;ca}
+for(int c = 0;c < a;++c){
 
-   if(b == l)
-   ++b;
+if(c == l)
+c++;
 
-   if(b == M)
-   break;
+if(c == a)
+break;
 
-//first calculate the avarage:
 for(int S_ab = 0;S_ab < 2;++S_ab)
-for(int S_cd = S_ab;S_cd < 2;++S_cd){
+for(int S_cd = 0;S_cd < 2;++S_cd)
+mat[S_ab][S_cd] = (*this)(l,0,S_ab,a,l,S_cd,c,a);
 
-double ward = (*this)(l,0,S_ab,a,b,S_cd,a,b);
+//first set the "l" block right
+for(int S_ab = 0;S_ab < 2;++S_ab)
+for(int S_cd = 0;S_cd < 2;++S_cd){
 
-for(int S_lb = 0;S_lb < 2;++S_lb)
-for(int S_ld = 0;S_ld < 2;++S_ld){
+double ward = mat[S_ab][S_cd];
 
-ward += std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) )
+for(int S_al = 0;S_al < 2;++S_al)
+ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_al + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_ab) * Tools::g6j(0,0,S_al,S_ab) * mat[S_al][S_cd];
 
-    * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(a,0,S_lb,l,b,S_ld,l,b);
+for(int S_cl = 0;S_cl < 2;++S_cl){
 
-    }
+ward += std::sqrt( 2.0 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_cl + 1.0) ) * (1 - 2*S_cd) * (1 - 2*S_cl) 
 
-    for(int S_al = 0;S_al < 2;++S_al)
-    for(int S_cl = 0;S_cl < 2;++S_cl){
-
-    ward += std::sqrt( (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_al)
-
-    * Tools::g6j(0,0,S_cd,S_cl) * (1 - 2*S_al) * (1 - 2*S_cl) * (1 - 2*S_ab) * (1 - 2*S_cd) * (*this)(b,0,S_al,a,l,S_cl,a,l);
+    * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(a,0,0,l,l,S_cl,c,l);
 
     }
 
-    i = rxTPM::gs2t(l,0,S_ab,a,b);
-    j = rxTPM::gs2t(l,0,S_cd,a,b);
+    i = rxTPM::gs2t(l,0,S_ab,a,l);
+    j = rxTPM::gs2t(l,0,S_cd,c,a);
 
-    (*this)[l](0,i,j) = ward/3.0;
+    if(a > l)
+    phase_i = 1 - 2*S_ab;
+    else
+    phase_i = 1;
+
+    (*this)[l](0,i,j) = phase_i * ward / 3.0;
     (*this)[l](0,j,i) = (*this)[l](0,i,j);
 
     }
 
-//then make the rest symmetric
-for(int S_lb = 0;S_lb < 2;++S_lb)
-for(int S_ld = S_lb;S_ld < 2;++S_ld){
+//then the "a" block
+for(int S_cl = 0;S_cl < 2;++S_cl){
 
-i = rxTPM::gs2t(a,0,S_lb,l,b);
-j = rxTPM::gs2t(a,0,S_ld,l,b);
+i = rxTPM::gs2t(a,0,0,l,l);
+j = rxTPM::gs2t(a,0,S_cl,c,l);
 
-if(l > b){
-
-phase_i = 1 - 2*S_lb;
-phase_j = 1 - 2*S_ld;
-
-}
-else{
-
-phase_i = 1;
+if(c > l)
+phase_j = 1 - 2*S_cl;
+else
 phase_j = 1;
-
-}
 
 (*this)[a](0,i,j) = 0.0;
 
 for(int S_ab = 0;S_ab < 2;++S_ab)
 for(int S_cd = 0;S_cd < 2;++S_cd){
 
-   (*this)[a](0,i,j) += phase_i * phase_j * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) ) 
+(*this)[a](0,i,j) += phase_j * std::sqrt( 0.5 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_cl + 1.0) ) * (1 - 2*S_cl) * (1 - 2*S_cd)
 
-      * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(l,0,S_ab,a,b,S_cd,a,b);
+* Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_cl,S_cd) * (*this)(l,0,S_ab,a,l,S_cd,c,a);
 
 }
 
@@ -377,195 +527,78 @@ for(int S_cd = 0;S_cd < 2;++S_cd){
 
 }
 
-for(int S_al = 0;S_al < 2;++S_al)
-for(int S_cl = S_al;S_cl < 2;++S_cl){
+}
 
-   i = rxTPM::gs2t(b,0,S_al,a,l);
-   j = rxTPM::gs2t(b,0,S_cl,a,l);
+//a = c and  b = l: W^l_{al;ad}
+for(int d = a + 1;d < M;++d){
 
-   if(a > l){
+   if(d == l)
+      d++;
 
-      phase_i = 1 - 2*S_al;
-      phase_j = 1 - 2*S_cl;
+   if(d == M)
+      break;
 
-   }
-   else{
+   for(int S_ab = 0;S_ab < 2;++S_ab)
+      for(int S_cd = 0;S_cd < 2;++S_cd)
+         mat[S_ab][S_cd] = (*this)(l,0,S_ab,a,l,S_cd,a,d);
 
-      phase_i = 1;
-      phase_j = 1;
-
-   }
-
-   (*this)[b](0,i,j) = 0.0;
-
+   //first set the "l" block right
    for(int S_ab = 0;S_ab < 2;++S_ab)
       for(int S_cd = 0;S_cd < 2;++S_cd){
 
-         (*this)[b](0,i,j) += phase_i * phase_j * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) ) * 
+         double ward = mat[S_ab][S_cd];
 
-            (1 - 2*S_ab) * (1 - 2*S_cd) * (1 - 2*S_al) * (1 - 2*S_cl) 
+         for(int S_al = 0;S_al < 2;++S_al)
+            ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_al + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_ab) * Tools::g6j(0,0,S_al,S_ab) * mat[S_al][S_cd];
 
-            * Tools::g6j(0,0,S_ab,S_al) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(l,0,S_ab,a,b,S_cd,a,b);
+         for(int S_ld = 0;S_ld < 2;++S_ld){
 
-      }
+            ward += std::sqrt( 2.0 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_ld + 1.0) )
 
-   (*this)[b](0,j,i) = (*this)[b](0,i,j);
-
-}
-
-}
-}
-
-//next with two equalities:
-for(int a = 0;a < M;++a){
-
-   if(a == l)
-      ++a;
-
-   if(a == M)
-      break;
-
-   //a = d and  b = l: W^l_{al;ca}
-   for(int c = 0;c < a;++c){
-
-      if(c == l)
-         c++;
-
-      if(c == a)
-         break;
-
-      for(int S_ab = 0;S_ab < 2;++S_ab)
-         for(int S_cd = 0;S_cd < 2;++S_cd)
-            mat[S_ab][S_cd] = (*this)(l,0,S_ab,a,l,S_cd,c,a);
-
-      //first set the "l" block right
-      for(int S_ab = 0;S_ab < 2;++S_ab)
-         for(int S_cd = 0;S_cd < 2;++S_cd){
-
-            double ward = mat[S_ab][S_cd];
-
-            for(int S_al = 0;S_al < 2;++S_al)
-               ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_al + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_ab) * Tools::g6j(0,0,S_al,S_ab) * mat[S_al][S_cd];
-
-            for(int S_cl = 0;S_cl < 2;++S_cl){
-
-               ward += std::sqrt( 2.0 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_cl + 1.0) ) * (1 - 2*S_cd) * (1 - 2*S_cl) 
-
-                  * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(a,0,0,l,l,S_cl,c,l);
-
-            }
-
-            i = rxTPM::gs2t(l,0,S_ab,a,l);
-            j = rxTPM::gs2t(l,0,S_cd,c,a);
-
-            if(a > l)
-               phase_i = 1 - 2*S_ab;
-            else
-               phase_i = 1;
-
-            (*this)[l](0,i,j) = phase_i * ward / 3.0;
-            (*this)[l](0,j,i) = (*this)[l](0,i,j);
+               * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(a,0,0,l,l,S_ld,l,d);
 
          }
 
-      //then the "a" block
-      for(int S_cl = 0;S_cl < 2;++S_cl){
+         i = rxTPM::gs2t(l,0,S_ab,a,l);
+         j = rxTPM::gs2t(l,0,S_cd,a,d);
 
-         i = rxTPM::gs2t(a,0,0,l,l);
-         j = rxTPM::gs2t(a,0,S_cl,c,l);
-
-         if(c > l)
-            phase_j = 1 - 2*S_cl;
+         if(a > l)
+            phase_i = 1 - 2*S_ab;
          else
-            phase_j = 1;
+            phase_i = 1;
 
-         (*this)[a](0,i,j) = 0.0;
-
-         for(int S_ab = 0;S_ab < 2;++S_ab)
-            for(int S_cd = 0;S_cd < 2;++S_cd){
-
-               (*this)[a](0,i,j) += phase_j * std::sqrt( 0.5 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_cl + 1.0) ) * (1 - 2*S_cl) * (1 - 2*S_cd)
-
-                  * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_cl,S_cd) * (*this)(l,0,S_ab,a,l,S_cd,c,a);
-
-            }
-
-         (*this)[a](0,j,i) = (*this)[a](0,i,j);
+         (*this)[l](0,i,j) = phase_i * ward / 3.0;
+         (*this)[l](0,j,i) = (*this)[l](0,i,j);
 
       }
 
-   }
+   //then the "a" block
+   for(int S_ld = 0;S_ld < 2;++S_ld){
 
-   //a = c and  b = l: W^l_{al;ad}
-   for(int d = a + 1;d < M;++d){
+      i = rxTPM::gs2t(a,0,0,l,l);
+      j = rxTPM::gs2t(a,0,S_ld,l,d);
 
-      if(d == l)
-         d++;
+      if(l > d)
+         phase_j = 1 - 2*S_ld;
+      else
+         phase_j = 1;
 
-      if(d == M)
-         break;
+      (*this)[a](0,i,j) = 0.0;
 
-      for(int S_ab = 0;S_ab < 2;++S_ab)
-         for(int S_cd = 0;S_cd < 2;++S_cd)
-            mat[S_ab][S_cd] = (*this)(l,0,S_ab,a,l,S_cd,a,d);
-
-      //first set the "l" block right
       for(int S_ab = 0;S_ab < 2;++S_ab)
          for(int S_cd = 0;S_cd < 2;++S_cd){
 
-            double ward = mat[S_ab][S_cd];
+            (*this)[a](0,i,j) += phase_j * std::sqrt( 0.5 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_ld + 1.0) ) 
 
-            for(int S_al = 0;S_al < 2;++S_al)
-               ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_al + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_ab) * Tools::g6j(0,0,S_al,S_ab) * mat[S_al][S_cd];
-
-            for(int S_ld = 0;S_ld < 2;++S_ld){
-
-               ward += std::sqrt( 2.0 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_ld + 1.0) )
-
-                  * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(a,0,0,l,l,S_ld,l,d);
-
-            }
-
-            i = rxTPM::gs2t(l,0,S_ab,a,l);
-            j = rxTPM::gs2t(l,0,S_cd,a,d);
-
-            if(a > l)
-               phase_i = 1 - 2*S_ab;
-            else
-               phase_i = 1;
-
-            (*this)[l](0,i,j) = phase_i * ward / 3.0;
-            (*this)[l](0,j,i) = (*this)[l](0,i,j);
+               * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_ld,S_cd) * (*this)(l,0,S_ab,a,l,S_cd,a,d);
 
          }
 
-      //then the "a" block
-      for(int S_ld = 0;S_ld < 2;++S_ld){
-
-         i = rxTPM::gs2t(a,0,0,l,l);
-         j = rxTPM::gs2t(a,0,S_ld,l,d);
-
-         if(l > d)
-            phase_j = 1 - 2*S_ld;
-         else
-            phase_j = 1;
-
-         (*this)[a](0,i,j) = 0.0;
-
-         for(int S_ab = 0;S_ab < 2;++S_ab)
-            for(int S_cd = 0;S_cd < 2;++S_cd){
-
-               (*this)[a](0,i,j) += phase_j * std::sqrt( 0.5 * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_ld + 1.0) ) 
-
-                  * Tools::g6j(0,0,S_ab,0) * Tools::g6j(0,0,S_ld,S_cd) * (*this)(l,0,S_ab,a,l,S_cd,a,d);
-
-            }
-
-         (*this)[a](0,j,i) = (*this)[a](0,i,j);
-
-      }
+      (*this)[a](0,j,i) = (*this)[a](0,i,j);
 
    }
+
+}
 
 }
 
