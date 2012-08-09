@@ -43,6 +43,8 @@ int main(void){
 
    rxTPM::init();
 
+   dDPM ddpm;
+   ddpm.fill_Random();
 /*
    //hamiltoniaan
    dDPM ham;

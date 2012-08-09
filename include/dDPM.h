@@ -35,6 +35,16 @@ class dDPM : public rxTPM {
       //destructor
       virtual ~dDPM();
 
+      using BlockMatrix::operator=;
+
+      using BlockMatrix::operator();
+
+      double operator()(int S,int S_ab,int a,int b,int S_cd,int c,int d) const;
+
+      double operator()(int l,int S,int S_ab,int a,int b,int S_cd,int c,int d) const;
+
+      static int get_inco(int S,int S_ab,int a,int b);
+
       double trace() const;
 
       double ddot(const dDPM &) const;
