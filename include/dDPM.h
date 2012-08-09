@@ -49,6 +49,8 @@ class dDPM : public rxTPM {
 
       double ddot(const dDPM &) const;
 
+      void proj_W();
+
    private:
 
 };

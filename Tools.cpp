@@ -101,3 +101,24 @@ int Tools::gN(){
    return N;
 
 }
+
+/**
+ * @param index a
+ * @param index b
+ * @return the index a shifted by b, used for translational invariance
+ */
+int Tools::shift(int a,int b){
+
+   return (a - b + L)%L;
+
+}
+
+/**
+ * @param index a
+ * @return the parity inverse of the index a
+ */
+int Tools::par(int a){
+
+   return (L - a)%L;
+
+}

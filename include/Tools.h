@@ -27,6 +27,10 @@ class Tools{
 
       static int gN();
 
+      static int shift(int a,int b);
+
+      static int par(int a);
+
    private:
 
       //!array in which I store 6j symbols needed

@@ -45,6 +45,15 @@ int main(void){
 
    dDPM ddpm;
    ddpm.fill_Random();
+
+   dDPM ddpm_copy(ddpm);
+
+   ddpm.proj_W();
+
+   ddpm_copy -= ddpm;
+
+   cout << ddpm.ddot(ddpm_copy) << endl;
+
 /*
    //hamiltoniaan
    dDPM ham;
