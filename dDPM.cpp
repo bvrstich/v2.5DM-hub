@@ -687,7 +687,7 @@ void dDPM::proj_W(){
          }
       }
    }
-
+/*
    //then b == c: ab;bd
    for(int a = 1;a < Tools::gL();++a){
 
@@ -755,7 +755,7 @@ void dDPM::proj_W(){
          }
       }
    }
-   
+  */ 
    //last regular: b == d --> W^l_{ab;cb}
    for(int a = 1;a < Tools::gL();++a){
 
@@ -823,281 +823,172 @@ void dDPM::proj_W(){
          }
       }
    }
-   /*
-   //two more terms: b == l
-   for(int a = 0;a < l;++a){
-
-   for(int S_cd = 0;S_cd < 2;++S_cd){
-
-   for(int c = 0;c < M;++c){
-
-   if(c != l && c != a){
-
-   for(int d = c + S_cd;d < M;++d){
-
-   if(d != l && d != a){
-
-   for(int S_ab = 0;S_ab < 2;++S_ab)
-   vec[S_ab] = (*this)(l,0,S_ab,a,l,S_cd,c,d);
-
-   for(int S_ab = 0;S_ab < 2;++S_ab){
-
-   double ward = vec[S_ab];
-
-   for(int S_al = 0;S_al < 2;++S_al)
-   ward += std::sqrt( (2.0*S_al + 1.0) * (2.0*S_ab + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_ab) * Tools::g6j(0,0,S_al,S_ab) * vec[S_al];
-
-   i = rxTPM::gs2t(l,0,S_ab,a,l);
-   j = rxTPM::gs2t(l,0,S_cd,c,d);
-
-   (*this)[l](0,i,j) = 0.5 * ward;
-   (*this)[l](0,j,i) = (*this)[l](0,i,j);
-
-   }
-
-   }
-
-   }
-
-   }
-
-   }
-
-   }
-
-   }
 
    //and at last: a == l
-   for(int b = l + 1;b < M;++b){
+   for(int b = 1;b < Tools::gL();++b){
 
-   for(int S_cd = 0;S_cd < 2;++S_cd){
+      for(int S_cd = 0;S_cd < 2;++S_cd){
 
-   for(int c = 0;c < M;++c){
+         for(int c = 1;c < Tools::gL();++c){
 
-   if(c != l && c != b){
+            if(c != b){
 
-   for(int d = c + S_cd;d < M;++d){
+               for(int d = c + S_cd;d < Tools::gL();++d){
 
-   if(d != l && d != b){
+                  if(d != b){
 
-   for(int S_ab = 0;S_ab < 2;++S_ab)
-   vec[S_ab] = (*this)(l,0,S_ab,l,b,S_cd,c,d);
+                     for(int S_ab = 0;S_ab < 2;++S_ab)
+                        vec[S_ab] = (*this)(0,S_ab,0,b,S_cd,c,d);
 
-   for(int S_ab = 0;S_ab < 2;++S_ab){
+                     for(int S_ab = 0;S_ab < 2;++S_ab){
 
-   double ward = vec[S_ab];
+                        double ward = vec[S_ab];
 
-   for(int S_lb = 0;S_lb < 2;++S_lb)
-   ward += std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ab + 1.0) ) * Tools::g6j(0,0,S_lb,S_ab) * vec[S_lb];
+                        for(int S_lb = 0;S_lb < 2;++S_lb)
+                           ward += std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ab + 1.0) ) * Tools::g6j(0,0,S_lb,S_ab) * vec[S_lb];
 
-   i = rxTPM::gs2t(l,0,S_ab,l,b);
-   j = rxTPM::gs2t(l,0,S_cd,c,d);
+                        i = rxTPM::gs2t(0,S_ab,0,b);
+                        j = rxTPM::gs2t(0,S_cd,c,d);
 
-   (*this)[l](0,i,j) = 0.5 * ward;
-(*this)[l](0,j,i) = (*this)[l](0,i,j);
+                        (*this)(0,i,j) = 0.5 * ward;
+                        (*this)(0,j,i) = (*this)(0,i,j);
 
-}
+                     }
 
-}
+                  }
 
-}
+               }
 
-}
+            }
 
-}
+         }
 
-}
-
-}
-
-//easy part: S = 3/2
-
-//first diagonal part: ab;ab
-for(int a = 0;a < M;++a){
-
-   if(a == l)
-      ++a;
-
-   if(a == M)
-      break;
-
-   for(int b = a + 1;b < M;++b){
-
-      if(b == l)
-         ++b;
-
-      if(b == M)
-         break;
-
-      i = rxTPM::gs2t(l,1,1,a,b);
-
-      (*this)[l](1,i,i) = 1.0/3.0 * ( (*this)[l](1,i,i) + (*this)(a,1,1,l,b,1,l,b) + (*this)(b,1,1,a,l,1,a,l) );
-
-      //rest is symmetric
-      i = rxTPM::gs2t(a,1,1,l,b);
-
-      (*this)[a](1,i,i) = (*this)(l,1,1,a,b,1,a,b);
-
-      i = rxTPM::gs2t(b,1,1,a,l);
-
-      (*this)[b](1,i,i) = (*this)(l,1,1,a,b,1,a,b);
+      }
 
    }
-}
 
-//three terms with one diagonal index:
+   //easy part: S = 3/2
 
-//1) b == d: ab;cb
-for(int a = 0;a < M;++a){
+   //first diagonal part: ab;ab
+   for(int a = 1;a < Tools::gL();++a){
 
-   if(a == l)
-      a++;
+      for(int b = a + 1;b < Tools::gL();++b){
 
-   if(a == M)
-      break;
+         i = rxTPM::gs2t(1,1,a,b);
 
-   for(int c = a + 1;c < M;++c){
+         (*this)(1,i,i) = 1.0/3.0 * ( (*this)(1,i,i) + (*this)(a,1,1,0,b,1,0,b) + (*this)(b,1,1,a,0,1,a,0) );
 
-      if(c == l)
-         c++;
+         //rest is symmetric
+         i = rxTPM::gs2t(1,1,Tools::par(a),Tools::shift(b,a));
 
-      if(c == M)
-         break;
+         (*this)(1,i,i) = (*this)(0,1,1,a,b,1,a,b);
 
-      for(int b = c + 1;b < M;++b){
+         i = rxTPM::gs2t(1,1,Tools::shift(a,b),Tools::par(b));
 
-         if(b == l)
-            b++;
-
-         if(b == M)
-            break;
-
-         i = rxTPM::gs2t(l,1,1,a,b);
-         j = rxTPM::gs2t(l,1,1,c,b);
-
-         (*this)[l](1,i,j) = 0.5 * ( (*this)[l](1,i,j) + (*this)(b,1,1,a,l,1,c,l) );
-         (*this)[l](1,j,i) = (*this)[l](1,i,j);
-
-         i = rxTPM::gs2t(b,1,1,a,l);
-         j = rxTPM::gs2t(b,1,1,c,l);
-
-         if(a > l)
-            phase_i = -1;
-         else
-            phase_i = 1;
-
-         if(c > l)
-            phase_j = -1;
-         else
-            phase_j = 1;
-
-         (*this)[b](1,i,j) = phase_i*phase_j*(*this)(l,1,1,a,b,1,c,b);
-         (*this)[b](1,j,i) = (*this)[b](1,i,j);
+         (*this)(1,i,i) = (*this)(0,1,1,a,b,1,a,b);
 
       }
    }
-}
 
-//2) b == c: ab;bc
-for(int a = 0;a < M;++a){
+   //three terms with one diagonal index:
 
-   if(a == l)
-      a++;
+   //1) b == d: ab;cb
+   for(int a = 1;a < Tools::gL();++a){
 
-   if(a == M)
-      break;
+      for(int c = a + 1;c < Tools::gL();++c){
 
-   for(int b = a + 1;b < M;++b){
+         for(int b = c + 1;b < Tools::gL();++b){
 
-      if(b == l)
-         b++;
+            i = rxTPM::gs2t(1,1,a,b);
+            j = rxTPM::gs2t(1,1,c,b);
 
-      if(b == M)
-         break;
+            (*this)(1,i,j) = 0.5 * ( (*this)(1,i,j) + (*this)(b,1,1,a,0,1,c,0) );
+            (*this)(1,j,i) = (*this)(1,i,j);
 
-      for(int c = b + 1;c < M;++c){
+            i = rxTPM::gs2t(1,1,Tools::shift(a,b),Tools::par(b));
+            j = rxTPM::gs2t(1,1,Tools::shift(c,b),Tools::par(b));
 
-         if(c == l)
-            c++;
+            if(Tools::shift(a,b) > Tools::par(b))
+               phase_i = -1;
+            else
+               phase_i = 1;
 
-         if(c == M)
-            break;
+            if(Tools::shift(c,b) > Tools::par(b))
+               phase_j = -1;
+            else
+               phase_j = 1;
 
-         i = rxTPM::gs2t(l,1,1,a,b);
-         j = rxTPM::gs2t(l,1,1,b,c);
+            (*this)(1,i,j) = phase_i*phase_j*(*this)(0,1,1,a,b,1,c,b);
+            (*this)(1,j,i) = (*this)(1,i,j);
 
-         (*this)[l](1,i,j) = 0.5 * ( (*this)[l](1,i,j) + (*this)(b,1,1,a,l,1,l,c) );
-         (*this)[l](1,j,i) = (*this)[l](1,i,j);
-
-         i = rxTPM::gs2t(b,1,1,a,l);
-         j = rxTPM::gs2t(b,1,1,l,c);
-
-         if(a > l)
-            phase_i = -1;
-         else
-            phase_i = 1;
-
-         if(l > c)
-            phase_j = -1;
-         else
-            phase_j = 1;
-
-         (*this)[b](1,i,j) = phase_i*phase_j*(*this)(l,1,1,a,b,1,b,c);
-         (*this)[b](1,j,i) = (*this)[b](1,i,j);
-
+         }
       }
    }
-}
 
-//3) a == c: ab;ac
-for(int a = 0;a < M;++a){
+   //2) b == c: ab;bc
+   for(int a = 1;a < Tools::gL();++a){
 
-   if(a == l)
-      a++;
+      for(int b = a + 1;b < Tools::gL();++b){
 
-   if(a == M)
-      break;
+         for(int c = b + 1;c < Tools::gL();++c){
 
-   for(int b = a + 1;b < M;++b){
+            i = rxTPM::gs2t(1,1,a,b);
+            j = rxTPM::gs2t(1,1,b,c);
 
-      if(b == l)
-         b++;
+            (*this)(1,i,j) = 0.5 * ( (*this)(1,i,j) + (*this)(b,1,1,a,0,1,0,c) );
+            (*this)(1,j,i) = (*this)(1,i,j);
 
-      if(b == M)
-         break;
+            i = rxTPM::gs2t(1,1,Tools::shift(a,b),Tools::par(b));
+            j = rxTPM::gs2t(1,1,Tools::par(b),Tools::shift(c,b));
 
-      for(int c = b + 1;c < M;++c){
+            if(Tools::shift(a,b) > Tools::par(b))
+               phase_i = -1;
+            else
+               phase_i = 1;
 
-         if(c == l)
-            c++;
+            if(Tools::par(b) > Tools::shift(c,b))
+               phase_j = -1;
+            else
+               phase_j = 1;
 
-         if(c == M)
-            break;
+            (*this)(1,i,j) = phase_i*phase_j*(*this)(0,1,1,a,b,1,b,c);
+            (*this)(1,j,i) = (*this)(1,i,j);
 
-         i = rxTPM::gs2t(l,1,1,a,b);
-         j = rxTPM::gs2t(l,1,1,a,c);
-
-         (*this)[l](1,i,j) = 0.5 * ( (*this)[l](1,i,j) + (*this)(a,1,1,l,b,1,l,c) );
-         (*this)[l](1,j,i) = (*this)[l](1,i,j);
-
-         i = rxTPM::gs2t(a,1,1,l,b);
-         j = rxTPM::gs2t(a,1,1,l,c);
-
-         if(l > b)
-            phase_i = -1;
-         else
-            phase_i = 1;
-
-         if(l > c)
-            phase_j = -1;
-         else
-            phase_j = 1;
-
-         (*this)[a](1,i,j) = phase_i * phase_j * (*this)(l,1,1,a,b,1,a,c);
-         (*this)[a](1,j,i) = (*this)[a](1,i,j);
-
+         }
       }
    }
-}
-*/
+
+   //3) a == c: ab;ac
+   for(int a = 1;a < Tools::gL();++a){
+
+      for(int b = a + 1;b < Tools::gL();++b){
+
+         for(int c = b + 1;c < Tools::gL();++c){
+
+            i = rxTPM::gs2t(1,1,a,b);
+            j = rxTPM::gs2t(1,1,a,c);
+
+            (*this)(1,i,j) = 0.5 * ( (*this)(1,i,j) + (*this)(a,1,1,0,b,1,0,c) );
+            (*this)(1,j,i) = (*this)(1,i,j);
+
+            i = rxTPM::gs2t(1,1,Tools::par(a),Tools::shift(b,a));
+            j = rxTPM::gs2t(1,1,Tools::par(a),Tools::shift(c,a));
+
+            if(Tools::par(a) > Tools::shift(b,a))
+               phase_i = -1;
+            else
+               phase_i = 1;
+
+            if(Tools::par(a) > Tools::shift(c,a))
+               phase_j = -1;
+            else
+               phase_j = 1;
+
+            (*this)(1,i,j) = phase_i * phase_j * (*this)(0,1,1,a,b,1,a,c);
+            (*this)(1,j,i) = (*this)(1,i,j);
+
+         }
+      }
+   }
+
 }
