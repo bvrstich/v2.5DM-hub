@@ -54,6 +54,8 @@ int main(void){
 
    cout << ddpm.ddot(ddpm_copy) << endl;
 
+   ddpm.test_proj_2();
+
 /*
    //hamiltoniaan
    dDPM ham;

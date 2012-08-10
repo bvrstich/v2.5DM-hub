@@ -51,6 +51,10 @@ class dDPM : public rxTPM {
 
       void proj_W();
 
+      void test_proj_1() const;
+
+      void test_proj_2() const;
+
    private:
 
 };

@@ -687,7 +687,7 @@ void dDPM::proj_W(){
          }
       }
    }
-/*
+
    //then b == c: ab;bd
    for(int a = 1;a < Tools::gL();++a){
 
@@ -695,67 +695,104 @@ void dDPM::proj_W(){
 
          for(int d = b + 1;d < Tools::gL();++d){
 
-            //first take average
-            for(int S_ab = 0;S_ab < 2;++S_ab)
-               for(int S_cd = 0;S_cd < 2;++S_cd){
+            if(b == Tools::par(b) && Tools::shift(a,b) == d && Tools::shift(d,b) == a){
 
-                  //1)
-                  double ward = (*this)(0,S_ab,a,b,S_cd,b,d);
+               //store original elements
+               for(int S_ab = 0;S_ab < 2;++S_ab)
+                  for(int S_cd = 0;S_cd < 2;++S_cd)
+                     mat[S_ab][S_cd] = (*this)(0,S_ab,a,b,S_cd,b,d);
 
-                  //2)
-                  for(int S_al = 0;S_al < 2;++S_al)
-                     for(int S_ld = 0;S_ld < 2;++S_ld){
+               //first take average
+               for(int S_ab = 0;S_ab < 2;++S_ab)
+                  for(int S_cd = 0;S_cd < 2;++S_cd){
 
-                        ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) ) * (1 - 2*S_ab) * (1 - 2*S_al)
+                     //1)
+                     double ward = mat[S_ab][S_cd];
 
-                           * Tools::g6j(0,0,S_al,S_ab) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(b,0,S_al,a,0,S_ld,0,d);
+                     //2)
+                     for(int S_al = 0;S_al < 2;++S_al)
+                        for(int S_ld = 0;S_ld < 2;++S_ld){
 
-                     }
+                           ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) ) * (1 - 2*S_ab) * (1 - 2*S_ld)
 
-                  i = rxTPM::gs2t(0,S_ab,a,b);
-                  j = rxTPM::gs2t(0,S_cd,b,d);
+                              * Tools::g6j(0,0,S_al,S_ab) * Tools::g6j(0,0,S_cd,S_ld) * mat[S_ld][S_al];
 
-                  (*this)(0,i,j) = 0.5 * ward;
-                  (*this)(0,j,i) = (*this)(0,i,j);
+                        }
 
-               }
+                     i = rxTPM::gs2t(0,S_ab,a,b);
+                     j = rxTPM::gs2t(0,S_cd,b,d);
 
-            //then symmetrize rest
-            for(int S_al = 0;S_al < 2;++S_al)
-               for(int S_ld = 0;S_ld < 2;++S_ld){
+                     (*this)(0,i,j) = 0.5 * ward;
+                     (*this)(0,j,i) = (*this)(0,i,j);
 
-                  i = rxTPM::gs2t(0,S_al,Tools::shift(a,b),Tools::par(b));
-                  j = rxTPM::gs2t(0,S_ld,Tools::par(b),Tools::shift(d,b));
+                  }
 
-                  if(Tools::shift(a,b) > Tools::par(b))
-                     phase_i = 1 - 2*S_al;
-                  else
-                     phase_i = 1;
+            }
+            else{
 
-                  if(Tools::par(b) > Tools::shift(d,b))
-                     phase_j = 1 - 2*S_ld;
-                  else
-                     phase_j = 1;
+               //first take average
+               for(int S_ab = 0;S_ab < 2;++S_ab)
+                  for(int S_cd = 0;S_cd < 2;++S_cd){
 
-                  (*this)(0,i,j) = 0.0;
+                     //1)
+                     double ward = (*this)(0,S_ab,a,b,S_cd,b,d);
 
-                  for(int S_ab = 0;S_ab < 2;++S_ab)
-                     for(int S_cd = 0;S_cd < 2;++S_cd){
+                     //2)
+                     for(int S_al = 0;S_al < 2;++S_al)
+                        for(int S_ld = 0;S_ld < 2;++S_ld){
 
-                        (*this)(0,i,j) += phase_i * phase_j * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) ) 
+                           ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) ) * (1 - 2*S_ab) * (1 - 2*S_al)
 
-                           * (1 - 2*S_ab) * (1 - 2*S_al) * Tools::g6j(0,0,S_al,S_ab) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(0,S_ab,a,b,S_cd,b,d);
+                              * Tools::g6j(0,0,S_al,S_ab) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(b,0,S_al,a,0,S_ld,0,d);
 
-                     }
+                        }
 
-                  (*this)(0,j,i) = (*this)(0,i,j);
+                     i = rxTPM::gs2t(0,S_ab,a,b);
+                     j = rxTPM::gs2t(0,S_cd,b,d);
 
-               }
+                     (*this)(0,i,j) = 0.5 * ward;
+                     (*this)(0,j,i) = (*this)(0,i,j);
+
+                  }
+
+               //then symmetrize rest
+               for(int S_al = 0;S_al < 2;++S_al)
+                  for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                     i = rxTPM::gs2t(0,S_al,Tools::shift(a,b),Tools::par(b));
+                     j = rxTPM::gs2t(0,S_ld,Tools::par(b),Tools::shift(d,b));
+
+                     if(Tools::shift(a,b) > Tools::par(b))
+                        phase_i = 1 - 2*S_al;
+                     else
+                        phase_i = 1;
+
+                     if(Tools::par(b) > Tools::shift(d,b))
+                        phase_j = 1 - 2*S_ld;
+                     else
+                        phase_j = 1;
+
+                     (*this)(0,i,j) = 0.0;
+
+                     for(int S_ab = 0;S_ab < 2;++S_ab)
+                        for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                           (*this)(0,i,j) += phase_i * phase_j * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) ) 
+
+                              * (1 - 2*S_ab) * (1 - 2*S_al) * Tools::g6j(0,0,S_al,S_ab) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(0,S_ab,a,b,S_cd,b,d);
+
+                        }
+
+                     (*this)(0,j,i) = (*this)(0,i,j);
+
+                  }
+
+            }
 
          }
       }
    }
-  */ 
+
    //last regular: b == d --> W^l_{ab;cb}
    for(int a = 1;a < Tools::gL();++a){
 
@@ -990,5 +1027,496 @@ void dDPM::proj_W(){
          }
       }
    }
+
+}
+
+/**
+ * test if the projection is correct, number 1 -> print all
+ */
+void dDPM::test_proj_1() const {
+
+   cout << "S = 1/2" << endl;
+   cout << endl;
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int b = 0;b < Tools::gL();++b)
+         for(int c = 0;c < Tools::gL();++c){
+
+            cout << endl;
+
+            //1) b = d
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "ab;cb\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,c,b) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_al = 0;S_al < 2;++S_al)
+                     for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                        double hard = std::sqrt( (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_cl)
+
+                           * (1 - 2*S_ab) * (1 - 2*S_cd) * Tools::g6j(0,0,S_ab,S_al) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(b,0,S_al,a,0,S_cl,c,0);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(a == 0)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  cout << ward << endl;
+
+               }
+
+            //2) b = c
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "ab;bc\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,b,c) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_al = 0;S_al < 2;++S_al)
+                     for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                        double hard = std::sqrt( (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * (1 - 2*S_al) * 
+
+                           (1 - 2*S_ab) * Tools::g6j(0,0,S_ab,S_al) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(b,0,S_al,a,0,S_ld,0,c);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(a == 0)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  cout << ward << endl;
+
+               }
+
+            //3) a = d
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "ab;ca\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,c,a) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                        double hard = std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * (1 - 2*S_cl)
+
+                           * (1 - 2*S_cd) * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(a,0,S_lb,0,b,S_cl,c,0);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == a)
+                           hard /= std::sqrt(2.0);
+
+                        if(0 == b)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  cout << ward << endl;
+
+               }
+
+            //4) a = c
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "ab;ac\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,a,c) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                        double hard = std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) 
+
+                           * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(a,0,S_lb,0,b,S_ld,0,c);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == a)
+                           hard /= std::sqrt(2.0);
+
+                        if(0 == b)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  cout << ward << endl;
+
+               }
+
+            cout << endl;
+
+            //)5 a = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "lb;cd\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,0,a,S_cd,b,c) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_lb + 1.0) ) * Tools::g6j(0,0,S_lb,S_ab) * (*this)(0,0,S_lb,0,a,S_cd,b,c);
+
+                  cout << ward << endl;
+
+               }
+
+            //6) b = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "al;cd\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,0,S_cd,b,c) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_al = 0;S_al < 2;++S_al){
+
+                     ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_al + 1.0) ) * (1 - 2*S_ab) * (1 - 2*S_al) 
+
+                        * Tools::g6j(0,0,S_al,S_ab) * (*this)(0,0,S_al,a,0,S_cd,b,c);
+
+                  }
+
+                  cout << ward << endl;
+
+               }
+
+            //7) c = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "ab;ld\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,0,c) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_ld = 0;S_ld < 2;++S_ld)
+                     ward += std::sqrt( (2.0*S_cd + 1.0) * (2.0*S_ld + 1.0) ) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(0,0,S_ab,a,b,S_ld,0,c);
+
+                  cout << ward << endl;
+
+               }
+
+            //8) d = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  cout << "ab;cl\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,c,0) << "\t";
+
+                  double ward = 0.0;
+
+                  for(int S_cl = 0;S_cl < 2;++S_cl)
+                     ward += std::sqrt( (2.0*S_cd + 1.0) * (2.0*S_cl + 1.0) ) * (1 - 2*S_cd) * (1 - 2*S_cl) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(0,0,S_ab,a,b,S_cl,c,0);
+
+                  cout << ward << endl;
+
+               }
+
+         }
+
+   cout << endl;
+
+
+   cout << endl;
+   cout << "S = 3/2" << endl;
+   cout << endl;
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int b = 0;b < Tools::gL();++b)
+         for(int c = 0;c < Tools::gL();++c){
+
+            cout << endl;
+            cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,c,b) << "\t" << (*this)(b,1,1,a,0,1,c,0) << endl;
+            cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,b,c) << "\t" << (*this)(b,1,1,a,0,1,0,c) << endl;
+            cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,c,a) << "\t" << (*this)(a,1,1,0,b,1,c,0) << endl;
+            cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,a,c) << "\t" << (*this)(a,1,1,0,b,1,0,c) << endl;
+            cout << endl;
+
+         }
+
+}
+
+/**
+ * test if the projection is correct, number 2 -> print only the errors
+ */
+void dDPM::test_proj_2() const {
+
+   cout << "S = 1/2" << endl;
+   cout << endl;
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int b = 0;b < Tools::gL();++b)
+         for(int c = 0;c < Tools::gL();++c){
+
+            //1) b = d
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_al = 0;S_al < 2;++S_al)
+                     for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                        double hard = std::sqrt( (2.0*S_al + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * (1 - 2*S_al) * (1 - 2*S_cl)
+
+                           * (1 - 2*S_ab) * (1 - 2*S_cd) * Tools::g6j(0,0,S_ab,S_al) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(b,0,S_al,a,0,S_cl,c,0);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(a == 0)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,b,S_cd,c,b)) > 1.0e-12)
+                     cout << "ab;cb\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,c,b) << "\t" << ward << endl;
+
+               }
+
+            //2) b = c
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_al = 0;S_al < 2;++S_al)
+                     for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                        double hard = std::sqrt( (2.0*S_al + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * (1 - 2*S_al) * 
+
+                           (1 - 2*S_ab) * Tools::g6j(0,0,S_ab,S_al) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(b,0,S_al,a,0,S_ld,0,c);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(a == 0)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,b,S_cd,b,c)) > 1.0e-12)
+                     cout << "ab;bc\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,b,c) << "\t" << ward << endl;
+
+               }
+
+            //3) a = d
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                        double hard = std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_cl + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * (1 - 2*S_cl)
+
+                           * (1 - 2*S_cd) * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_cl) * (*this)(a,0,S_lb,0,b,S_cl,c,0);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == a)
+                           hard /= std::sqrt(2.0);
+
+                        if(0 == b)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,b,S_cd,c,a)) > 1.0e-12)
+                     cout << "ab;ca\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,c,a) << "\t" << ward << endl;
+
+               }
+
+            //4) a = c
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     for(int S_ld = 0;S_ld < 2;++S_ld){
+
+                        double hard = std::sqrt( (2.0*S_lb + 1.0) * (2.0*S_ld + 1.0) * (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) 
+
+                           * Tools::g6j(0,0,S_ab,S_lb) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(a,0,S_lb,0,b,S_ld,0,c);
+
+                        if(a == b)
+                           hard /= std::sqrt(2.0);
+
+                        if(c == a)
+                           hard /= std::sqrt(2.0);
+
+                        if(0 == b)
+                           hard *= std::sqrt(2.0);
+
+                        if(c == 0)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,b,S_cd,a,c))>1.0e-12)
+                     cout << "ab;ac\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,a,c) << "\t" << ward << endl;
+
+               }
+
+            //)5 a = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_lb = 0;S_lb < 2;++S_lb)
+                     ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_lb + 1.0) ) * Tools::g6j(0,0,S_lb,S_ab) * (*this)(0,0,S_lb,0,a,S_cd,b,c);
+
+                  if(fabs(ward - (*this)(0,0,S_ab,0,a,S_cd,b,c)) > 1.0e-12)
+                     cout << "lb;cd\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,0,a,S_cd,b,c) << "\t" << ward << endl;
+
+
+               }
+
+            //6) b = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_al = 0;S_al < 2;++S_al){
+
+                     ward += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_al + 1.0) ) * (1 - 2*S_ab) * (1 - 2*S_al)
+
+                        * Tools::g6j(0,0,S_al,S_ab) * (*this)(0,0,S_al,a,0,S_cd,b,c);
+
+                  }
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,0,S_cd,b,c)) > 1.0e-12)
+                     cout << "al;cd\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,0,S_cd,b,c) << "\t" << ward << endl;
+
+               }
+
+            //7) c = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_ld = 0;S_ld < 2;++S_ld)
+                     ward += std::sqrt( (2.0*S_cd + 1.0) * (2.0*S_ld + 1.0) ) * Tools::g6j(0,0,S_cd,S_ld) * (*this)(0,0,S_ab,a,b,S_ld,0,c);
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,b,S_cd,0,c)) > 1.0e-12)
+                     cout << "ab;ld\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,0,c) << "\t" << ward << endl;
+
+               }
+
+            //8) d = l
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                  double ward = 0.0;
+
+                  for(int S_cl = 0;S_cl < 2;++S_cl){
+
+                     ward += std::sqrt( (2.0*S_cd + 1.0) * (2.0*S_cl + 1.0) ) * (1 - 2*S_cd) * (1 - 2*S_cl) 
+
+                        * Tools::g6j(0,0,S_cd,S_cl) * (*this)(0,0,S_ab,a,b,S_cl,c,0);
+
+                  }
+
+
+                  if(fabs(ward - (*this)(0,0,S_ab,a,b,S_cd,c,0)) > 1.0e-12)
+                     cout << "ab;cl\t" << a << "\t" << b << "\t" << c << "\t(" << S_ab << ")\t(" << S_cd << ")\t" << (*this)(0,0,S_ab,a,b,S_cd,c,0) << "\t" << ward << endl;
+
+
+               }
+
+         }
+
+   cout << endl;
+
+
+   cout << endl;
+   cout << "S = 3/2" << endl;
+   cout << endl;
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int b = 0;b < Tools::gL();++b)
+         for(int c = 0;c < Tools::gL();++c){
+
+            if(fabs((*this)(0,1,1,a,b,1,c,b) - (*this)(b,1,1,a,0,1,c,0)) > 1.0e-12)
+               cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,c,b) << "\t" << (*this)(b,1,1,a,0,1,c,0) << endl;
+
+            if(fabs((*this)(0,1,1,a,b,1,b,c) - (*this)(b,1,1,a,0,1,0,c)) > 1.0e-12)
+               cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,b,c) << "\t" << (*this)(b,1,1,a,0,1,0,c) << endl;
+
+            if(fabs((*this)(0,1,1,a,b,1,c,a) - (*this)(a,1,1,0,b,1,c,0)) > 1.0e-12)
+               cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,c,a) << "\t" << (*this)(a,1,1,0,b,1,c,0) << endl;
+
+            if(fabs((*this)(0,1,1,a,b,1,a,c) - (*this)(a,1,1,0,b,1,0,c)) > 1.0e-12)
+               cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,a,c) << "\t" << (*this)(a,1,1,0,b,1,0,c) << endl;
+
+         }
 
 }
