@@ -43,20 +43,8 @@ int main(void){
 
    rxTPM::init();
 
-   dDPM ddpm;
-   ddpm.fill_Random();
+   SUP::init();
 
-   dDPM ddpm_copy(ddpm);
-
-   ddpm.proj_W();
-
-   ddpm_copy -= ddpm;
-
-   cout << ddpm.ddot(ddpm_copy) << endl;
-
-   ddpm.test_proj_2();
-
-/*
    //hamiltoniaan
    dDPM ham;
    ham.hubbard(1.0);
@@ -64,13 +52,14 @@ int main(void){
    dDPM W;
    W.unit();
 
+
    dDPM backup(W);
 
    double t = 1.0;
    double tolerance = 1.0e-5;
 
    //outer iteration: scaling of the potential barrier
-   while(t > 1.0e-10){
+   //while(t > 1.0e-10){
 
       cout << t << "\t" << W.trace() << "\t" << W.ddot(ham) << "\t";
 
@@ -81,10 +70,10 @@ int main(void){
 
       //inner iteration: 
       //Newton's method for finding the minimum of the current potential
-      while(convergence > tolerance){
+    //  while(convergence > tolerance){
 
          ++nr_newton_iter;
-
+/*
          SUP P;
 
          P.fill(W);

@@ -55,6 +55,10 @@ class dDPM : public rxTPM {
 
       void test_proj_2() const;
 
+      void hubbard(double);
+
+      void unit();
+
    private:
 
 };

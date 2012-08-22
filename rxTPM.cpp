@@ -179,7 +179,7 @@ ostream &operator<<(ostream &output,const rxTPM &rxtpm_p){
 /**
  * @param S the dp spin
  * @param i the tp index
- * @param option == 0 return a, == 1 return b
+ * @param option == 0 return S_ab, == 1 return a, == 2 return b
  * @return the sp indices corresponding to the tp index i
  */
 int rxTPM::gt2s(int S,int i,int option){

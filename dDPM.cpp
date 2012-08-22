@@ -695,7 +695,7 @@ void dDPM::proj_W(){
 
          for(int d = b + 1;d < Tools::gL();++d){
 
-            if(b == Tools::par(b) && Tools::shift(a,b) == d && Tools::shift(d,b) == a){
+            if(b == Tools::par(b) && Tools::shift(a,b) == d && Tools::shift(d,b) == a){//then it is projected onto itsself!
 
                //store original elements
                for(int S_ab = 0;S_ab < 2;++S_ab)
@@ -1518,5 +1518,150 @@ void dDPM::test_proj_2() const {
                cout << a << "\t" << b << "\t" << c << "\t|\t" << (*this)(0,1,1,a,b,1,a,c) << "\t" << (*this)(a,1,1,0,b,1,0,c) << endl;
 
          }
+
+}
+
+/**
+ * Fill the dDPM object with the Hubbard Hamiltonian with on-site repulsion U
+ * @param U the on-site repulsion
+ */
+void dDPM::hubbard(double U) {
+
+   int a,b,c,d;
+   int S_ab,S_cd;
+
+   int sign;
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < gdim(S);++i){
+
+         S_ab = gt2s(S,i,0);
+
+         a = gt2s(S,i,1);
+         b = gt2s(S,i,2);
+
+         for(int j = i;j < gdim(S);++j){
+
+            S_cd = gt2s(S,j,0);
+
+            c = gt2s(S,j,1);
+            d = gt2s(S,j,2);
+            
+            (*this)(S,i,j) = 0.0;
+
+            if(S_ab == S_cd){
+
+               sign = 1 - 2*S_ab;
+
+               //first hopping
+               if( (a == c) && ( ( (b + 1)%Tools::gL() == d ) || ( b == (d + 1)%Tools::gL() ) ) )
+                  (*this)(S,i,j) -= 1.0/( (Tools::gN() - 1.0) * (Tools::gN() - 2.0) );
+
+               if( (b == c) && ( ( (a + 1)%Tools::gL() == d ) || ( a == (d + 1)%Tools::gL() ) ) )
+                  (*this)(S,i,j) -= sign/( (Tools::gN() - 1.0) * (Tools::gN() - 2.0) );
+
+               if( (a == d) && ( ( (b + 1)%Tools::gL() == c ) || ( b == (c + 1)%Tools::gL() ) ) )
+                  (*this)(S,i,j) -= sign/( (Tools::gN() - 1.0) * (Tools::gN() - 2.0) );
+
+               if( (b == d) && ( ( (a + 1)%Tools::gL() == c ) || ( a == (c + 1)%Tools::gL() ) ) )
+                  (*this)(S,i,j) -= 1.0/( (Tools::gN() - 1.0) * (Tools::gN() - 2.0) );
+
+               //only on-site interaction for singlet tp states:
+               if(S_ab == 0)
+                  if(i == j && a == b)
+                     (*this)(S,i,j) += 2.0*U/(Tools::gN() - 2.0);
+
+               if(a == b)
+                  (*this)(S,i,j) /= std::sqrt(2.0);
+
+               if(c == d)
+                  (*this)(S,i,j) /= std::sqrt(2.0);
+
+            }
+
+         }
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * initialize (*this) on the correctly normalized unitmatrix (so that the trace is N(N-1)(N-2)/2)
+ */
+void dDPM::unit(){
+
+   int S_ab,S_cd;
+   int a,b,c,d;
+
+   double norm;
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < gdim(S);++i){
+
+         S_ab = gt2s(S,i,0);
+
+         a = gt2s(S,i,1);
+         b = gt2s(S,i,2);
+
+         for(int j = i;j < gdim(S);++j){
+
+            S_cd = gt2s(S,j,0);
+
+            c = gt2s(S,j,1);
+            d = gt2s(S,j,2);
+
+            //set the norm
+            norm = 1.0;
+
+            if(a == b)
+               norm /= std::sqrt(2.0);
+
+            if(c == d)
+               norm /= std::sqrt(2.0);
+
+            (*this)(S,i,j) = 0.0;
+
+            //set the unitmatrix
+            if(a == c && b == d){
+
+               if(S_ab == S_cd)
+                  (*this)(S,i,j) += 1.0;
+
+               if(a == 0)
+                  (*this)(S,i,j) += std::sqrt( (2*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_cd);
+
+               if(b == 0)
+                  (*this)(S,i,j) += std::sqrt( (2*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_cd) * (1 - 2*S_ab) * (1 - 2*S_cd);
+
+            }
+
+            if(a == d && b == c){
+
+               if(S_ab == S_cd)
+                  (*this)(S,i,j) += (1 - 2*S_ab);
+
+               if(a == 0)
+                  (*this)(S,i,j) += std::sqrt( (2*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_cd) * (1 - 2*S_cd);
+
+               if(b == 0)
+                  (*this)(S,i,j) += std::sqrt( (2*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_cd) * (1 - 2*S_ab);
+
+            }
+
+            (*this)(S,i,j) *= norm * (Tools::gN()*(Tools::gN() - 1.0)*(Tools::gN() - 2.0)/(2*Tools::gL()*(2*Tools::gL() - 1.0)*(2*Tools::gL() - 2.0)));
+
+            (*this)(S,j,i) = (*this)(S,i,j);
+
+         }
+
+      }
+
+   }
 
 }
