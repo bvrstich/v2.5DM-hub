@@ -43,6 +43,8 @@ int main(void){
 
    rxTPM::init();
 
+   TPM::init();
+
    SUP::init();
    EIG::init();
 
@@ -52,6 +54,8 @@ int main(void){
    //hamiltoniaan
    dDPM ham;
    ham.hubbard(1.0);
+
+   ham.proj_W();
 
    dDPM W;
    W.unit();
@@ -134,6 +138,8 @@ int main(void){
    Tools::clear();
 
    rxTPM::clear();
+
+   TPM::clear();
 
    return 0;
 

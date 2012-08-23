@@ -75,6 +75,8 @@ class dDPM : public rxTPM {
 
       double line_search(double,const dDPM &,const dDPM &);
 
+      void Q(char option,const dDPM &);
+
    private:
 
 };

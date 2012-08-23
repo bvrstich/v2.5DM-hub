@@ -68,6 +68,9 @@
 #include "rxTPM.h"
 #include "dDPM.h"
 
+#include "SPM.h"
+#include "TPM.h"
+
 #include "Tools.h"
 
 #include "SUP.h"
