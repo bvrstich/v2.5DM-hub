@@ -2270,20 +2270,20 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
       spm.bar(1.0/(Tools::gN() - 1.0),tpm);
 
       double dspm = ddpm_i.trace()/((Tools::gN() - 1.0)*(Tools::gN() - 2.0));
-/*
+
       SPM breve;
-      breve.breve(1.0/((N - 1.0)*(N - 2.0)),ddpm_i);
+      breve.breve(1.0/((Tools::gN() - 1.0)*(Tools::gN() - 2.0)),ddpm_i);
 
       ssdTPM ssdtpm;
-      ssdtpm.bar(1.0/((N - 1.0)*(N - 2.0)),ddpm_i);
+      ssdtpm.bar(1.0/((Tools::gN() - 1.0)*(Tools::gN() - 2.0)),ddpm_i);
 
       PHM phm;
-      phm.spinsum(1.0/(N - 2.0),ddpm_i);
+      phm.spinsum(1.0/(Tools::gN() - 2.0),ddpm_i);
 
       dTPM dtpm;
-      dtpm.bar(1.0/(N - 2.0),ddpm_i);
+      dtpm.bar(1.0/(Tools::gN() - 2.0),ddpm_i);
 
-      double ward = 2.0 * ddpm_i.dotunit()/( N*(N - 1.0)*(N - 2.0) );
+      double ward = 2.0 * ddpm_i.dotunit()/( Tools::gN()*(Tools::gN() - 1.0)*(Tools::gN() - 2.0) );
 
       int a,b,c,d;
       int S_ab,S_cd;
@@ -2292,100 +2292,124 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
 
       double norm_ab,norm_cd;
 
-      double hard;
+      //start with the S = 1/2 block, this is the most difficult one:
+      for(int i = 0;i < gdim(0);++i){
 
-      for(int l = 0;l < M;++l){
+         S_ab = gt2s(0,i,0);
 
-         //start with the S = 1/2 block, this is the most difficult one:
-         for(int i = 0;i < ddpm[l]->gdim(0);++i){
+         a = gt2s(0,i,1);
+         b = gt2s(0,i,2);
 
-            S_ab = rxTPM::gt2s(l,0,i,0);
+         sign_ab = 1 - 2*S_ab;
 
-            a = rxTPM::gt2s(l,0,i,1);
-            b = rxTPM::gt2s(l,0,i,2);
+         norm_ab = 1.0;
 
-            sign_ab = 1 - 2*S_ab;
+         if(a == b)
+            norm_ab /= std::sqrt(2.0);
 
-            norm_ab = 1.0;
+         for(int j = i;j < gdim(0);++j){
 
-            if(a == b)
-               norm_ab /= std::sqrt(2.0);
+            S_cd = gt2s(0,j,0);
 
-            for(int j = i;j < ddpm[l]->gdim(0);++j){
+            c = gt2s(0,j,1);
+            d = gt2s(0,j,2);
 
-               S_cd = rxTPM::gt2s(l,0,j,0);
+            sign_cd = 1 - 2*S_cd;
 
-               c = rxTPM::gt2s(l,0,j,1);
-               d = rxTPM::gt2s(l,0,j,2);
+            norm_cd = 1.0;
 
-               sign_cd = 1 - 2*S_cd;
+            if(c == d)
+               norm_cd /= std::sqrt(2.0);
 
-               norm_cd = 1.0;
+            //dp part
+            (*this)(0,i,j) = -ddpm_i(0,i,j);
 
-               if(c == d)
-                  norm_cd /= std::sqrt(2.0);
+            if(i == j)
+               (*this)(0,i,j) += ward - dspm;
 
-               hard = std::sqrt( (2*S_ab + 1.0) * (2*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_cd);
+            if(S_ab == S_cd){
 
-               //dp part
-               (*this)[l](0,i,j) = -ddpm_i[l](0,i,j);
-
-               if(i == j)
-                  (*this)[l](0,i,j) += ward - 0.5 * (dspm[a] + dspm[b]);
-
-               if(S_ab == S_cd){
-
-                  (*this)[l](0,i,j) += tpm(S_ab,a,b,c,d) + phm(S_ab,a,b,c,d) + (1 - 2*S_ab)*phm(S_ab,b,a,c,d) + (1 - 2*S_cd) * phm(S_cd,d,c,a,b) + phm(S_cd,c,d,a,b);
-
-                  if(b == d)
-                     (*this)[l](0,i,j) -= norm_ab * norm_cd * ( spm(a,c) + breve(a,c) + ssdtpm[a](a,c) + ssdtpm[c](a,c) - dtpm[b](S_ab,a,c) );
-
-                  if(a == d)
-                     (*this)[l](0,i,j) -= sign_ab * norm_ab * norm_cd * ( spm(b,c) + breve(b,c) + ssdtpm[b](b,c) + ssdtpm[c](b,c) - dtpm[a](S_ab,b,c) );
-
-                  if(b == c)
-                     (*this)[l](0,i,j) -= sign_cd * norm_ab * norm_cd * ( spm(a,d) + breve(a,d) + ssdtpm[a](a,d) + ssdtpm[d](a,d) - dtpm[b](S_ab,a,d));
-
-                  if(a == c)
-                     (*this)[l](0,i,j) -= norm_ab * norm_cd * ( spm(b,d) + breve(b,d) + ssdtpm[b](b,d) + ssdtpm[d](b,d) - dtpm[a](S_ab,b,d) );
-
-               }
-
-            }
-         }
-
-         //then the S = 3/2 block, this should be easy, totally antisymmetrical 
-         for(int i = 0;i < ddpm[l]->gdim(1);++i){
-
-            a = rxTPM::gt2s(l,1,i,1);
-            b = rxTPM::gt2s(l,1,i,2);
-
-            for(int j = i;j < ddpm[l]->gdim(1);++j){
-
-               c = rxTPM::gt2s(l,1,j,1);
-               d = rxTPM::gt2s(l,1,j,2);
-
-               (*this)[l](1,i,j) = tpm(1,a,b,c,d) - ddpm_i[l](1,i,j) + phm(1,a,b,c,d) - phm(1,b,a,c,d) - phm(1,d,c,a,b) + phm(1,c,d,a,b);
-
-               if(i == j)
-                  (*this)[l](1,i,j) += ward - 0.5 * (dspm[a] + dspm[b]);
+               (*this)(0,i,j) += tpm(S_ab,a,b,c,d) + phm(S_ab,a,b,c,d) + (1 - 2*S_ab)*phm(S_ab,b,a,c,d) 
+               
+                  + (1 - 2*S_cd) * phm(S_cd,d,c,a,b) + phm(S_cd,c,d,a,b);
 
                if(b == d)
-                  (*this)[l](1,i,j) -= spm(a,c) + breve(a,c) + ssdtpm[a](a,c) + ssdtpm[c](a,c) - dtpm[b](1,a,c);
+                  (*this)(0,i,j) -= norm_ab * norm_cd * ( spm(a,c) + breve(a,c) + ssdtpm(a,a,c) + ssdtpm(c,a,c) - dtpm(b,S_ab,a,c) );
+
+               if(a == d)
+                  (*this)(0,i,j) -= sign_ab * norm_ab * norm_cd * ( spm(b,c) + breve(b,c) + ssdtpm(b,b,c) + ssdtpm(c,b,c) - dtpm(a,S_ab,b,c) );
 
                if(b == c)
-                  (*this)[l](1,i,j) += spm(a,d) + breve(a,d) + ssdtpm[a](a,d) + ssdtpm[d](a,d) - dtpm[b](1,a,d);
+                  (*this)(0,i,j) -= sign_cd * norm_ab * norm_cd * ( spm(a,d) + breve(a,d) + ssdtpm(a,a,d) + ssdtpm(d,a,d) - dtpm(b,S_ab,a,d));
 
                if(a == c)
-                  (*this)[l](1,i,j) -= spm(b,d) + breve(b,d) + ssdtpm[b](b,d) + ssdtpm[d](b,d) - dtpm[a](1,b,d);
+                  (*this)(0,i,j) -= norm_ab * norm_cd * ( spm(b,d) + breve(b,d) + ssdtpm(b,b,d) + ssdtpm(d,b,d) - dtpm(a,S_ab,b,d) );
 
             }
-         }
 
+         }
       }
-*/
+
+      //then the S = 3/2 block, this should be easy, totally antisymmetrical 
+      for(int i = 0;i < gdim(1);++i){
+
+         a = gt2s(1,i,1);
+         b = gt2s(1,i,2);
+
+         for(int j = i;j < gdim(1);++j){
+
+            c = gt2s(1,j,1);
+            d = gt2s(1,j,2);
+
+            (*this)(1,i,j) = tpm(1,a,b,c,d) - ddpm_i(1,i,j) + phm(1,a,b,c,d) - phm(1,b,a,c,d) - phm(1,d,c,a,b) + phm(1,c,d,a,b);
+
+            if(i == j)
+               (*this)(1,i,j) += ward - dspm;
+
+            if(b == d)
+               (*this)(1,i,j) -= spm(a,c) + breve(a,c) + ssdtpm(a,a,c) + ssdtpm(c,a,c) - dtpm(b,1,a,c);
+
+            if(b == c)
+               (*this)(1,i,j) += spm(a,d) + breve(a,d) + ssdtpm(a,a,d) + ssdtpm(d,a,d) - dtpm(b,1,a,d);
+
+            if(a == c)
+               (*this)(1,i,j) -= spm(b,d) + breve(b,d) + ssdtpm(b,b,d) + ssdtpm(d,b,d) - dtpm(a,1,b,d);
+
+         }
+      }
+
    }
 
    this->symmetrize();
+
+}
+
+/**
+ * @return the trace of *this with the unitmatrix in dDP space.
+ */
+double dDPM::dotunit() const {
+
+   double ward = this->trace();
+
+   for(int S_ab = 0;S_ab < 2;++S_ab)
+      for(int S_cd = 0;S_cd < 2;++S_cd){
+
+         double hard = 0.0;
+
+         for(int l = 0;l < Tools::gL();++l)
+            for(int b = 0;b < Tools::gL();++b){
+
+               if(l == b)
+                  hard += 2.0 * (*this)(l,0,S_ab,l,b,S_cd,l,b);
+               else
+                  hard += (*this)(l,0,S_ab,l,b,S_cd,l,b);
+
+            }
+
+         ward += 2.0 * hard * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * Tools::g6j(0,0,S_ab,S_cd);
+
+      }
+
+   return ward;
 
 }

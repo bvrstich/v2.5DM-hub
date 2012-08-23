@@ -77,6 +77,8 @@ class dDPM : public rxTPM {
 
       void Q(char option,const dDPM &);
 
+      double dotunit() const;
+
    private:
 
 };

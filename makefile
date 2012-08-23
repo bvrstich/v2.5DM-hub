@@ -18,7 +18,11 @@ CPPSRC	= pr_sdp.cpp\
             SUP.cpp\
             EIG.cpp\
             SPM.cpp\
-            TPM.cpp
+            TPM.cpp\
+            ssdTPM.cpp\
+            PHM.cpp\
+            xSPM.cpp\
+            dTPM.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
