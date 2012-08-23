@@ -44,6 +44,7 @@ int main(void){
    rxTPM::init();
 
    SUP::init();
+   EIG::init();
 
    //hamiltoniaan
    dDPM ham;
@@ -73,13 +74,13 @@ int main(void){
     //  while(convergence > tolerance){
 
          ++nr_newton_iter;
-/*
+
          SUP P;
 
          P.fill(W);
 
          P.invert();
-
+/*
          //eerst -gradient aanmaken:
          dDPM grad;
 
