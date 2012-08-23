@@ -1967,6 +1967,9 @@ double dDPM::line_search(double t,const dDPM &W,const dDPM &ham){
  */
 void dDPM::Q(char option,const dDPM &ddpm_i){
 
+   //ONLY FOR TEST!!!
+   *this = 0.0;
+
    if(option == 'U'){
 
       TPM tpm;
@@ -2022,8 +2025,8 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
 
             //np(1)
             if(i == j)
-               (*this)(0,i,j) += ward - spm(0,0);
-
+               (*this)(0,i,j) += ward/* - spm(0,0)*/;
+/*
             //terms that contribute when the spin is diagonal:
             if(S_ab == S_cd){
 
@@ -2047,9 +2050,9 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
                   (*this)(0,i,j) -= norm_ab * norm_cd * spm(b,d);
 
             }
-
+*/
             if(b == 0){
-
+/*
                //tp(2)
                if(a == 0)
                   (*this)(0,i,j) += std::sqrt(2.0) * norm_ab * sign_ab * sign_cd * hard * tpm(S_cd,a,0,c,d);
@@ -2071,7 +2074,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
                //sp(6)
                if(a == c)
                   (*this)(0,i,j) -= sign_ab * sign_cd * norm_ab * norm_cd * hard * spm(0,d);
-
+*/
                //np(4)
                if(c == 0 && a == d)
                   (*this)(0,i,j) += sign_ab * norm_ab * norm_cd * hard * ward;
@@ -2083,7 +2086,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
             }
 
             if(a == 0){
-
+/*
                //tp(3)
                if(b == 0)
                   (*this)(0,i,j) += std::sqrt(2.0) * norm_ab * hard * tpm(S_cd,0,b,c,d);
@@ -2105,7 +2108,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
                //sp(6) second part
                if(b == c)
                   (*this)(0,i,j) -= sign_cd * norm_ab * norm_cd * hard * spm(d,0);
-
+*/
                //np(3)
                if(c == 0 && b == d)
                   (*this)(0,i,j) += norm_ab * norm_cd * hard * ward;
@@ -2115,7 +2118,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
                   (*this)(0,i,j) += sign_cd * norm_ab * norm_cd * hard * ward;
 
             }
-
+/*
             if(0 == d){
 
                //tp(4)
@@ -2228,7 +2231,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
                (*this)(0,i,j) += std::sqrt( (2*S_ab + 1) * (2*S_cd + 1.0) ) * norm_ab * norm_cd * hulp;
 
             }
-
+*/
          }
       }
 
@@ -2243,11 +2246,11 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
             c = gt2s(1,j,1);
             d = gt2s(1,j,2);
 
-            (*this)(1,i,j) = tpm(1,a,b,c,d) - ddpm_i(1,i,j);
+            (*this)(1,i,j) = /*tpm(1,a,b,c,d)*/ - ddpm_i(1,i,j);
 
             if(i == j)
-               (*this)(1,i,j) += ward - spm(0,0);
-
+               (*this)(1,i,j) += ward/* - spm(0,0)*/;
+/*
             if(b == d)
                (*this)(1,i,j) += tpm(1,a,0,c,0) - spm(a,c);
 
@@ -2256,7 +2259,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
 
             if(a == c)
                (*this)(1,i,j) += tpm(1,b,0,d,0) - spm(b,d);
-
+*/
          }
       }
 
@@ -2325,8 +2328,8 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
             (*this)(0,i,j) = -ddpm_i(0,i,j);
 
             if(i == j)
-               (*this)(0,i,j) += ward - dspm;
-
+               (*this)(0,i,j) += ward/* - dspm*/;
+/*
             if(S_ab == S_cd){
 
                (*this)(0,i,j) += tpm(S_ab,a,b,c,d) + phm(S_ab,a,b,c,d) + (1 - 2*S_ab)*phm(S_ab,b,a,c,d) 
@@ -2346,7 +2349,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
                   (*this)(0,i,j) -= norm_ab * norm_cd * ( spm(b,d) + breve(b,d) + ssdtpm(b,b,d) + ssdtpm(d,b,d) - dtpm(a,S_ab,b,d) );
 
             }
-
+*/
          }
       }
 
@@ -2361,11 +2364,11 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
             c = gt2s(1,j,1);
             d = gt2s(1,j,2);
 
-            (*this)(1,i,j) = tpm(1,a,b,c,d) - ddpm_i(1,i,j) + phm(1,a,b,c,d) - phm(1,b,a,c,d) - phm(1,d,c,a,b) + phm(1,c,d,a,b);
+            (*this)(1,i,j) =/* tpm(1,a,b,c,d)*/ - ddpm_i(1,i,j)/* + phm(1,a,b,c,d) - phm(1,b,a,c,d) - phm(1,d,c,a,b) + phm(1,c,d,a,b)*/;
 
             if(i == j)
-               (*this)(1,i,j) += ward - dspm;
-
+               (*this)(1,i,j) += ward/* - dspm*/;
+/*
             if(b == d)
                (*this)(1,i,j) -= spm(a,c) + breve(a,c) + ssdtpm(a,a,c) + ssdtpm(c,a,c) - dtpm(b,1,a,c);
 
@@ -2374,7 +2377,7 @@ void dDPM::Q(char option,const dDPM &ddpm_i){
 
             if(a == c)
                (*this)(1,i,j) -= spm(b,d) + breve(b,d) + ssdtpm(b,b,d) + ssdtpm(d,b,d) - dtpm(a,1,b,d);
-
+*/
          }
       }
 
