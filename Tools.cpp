@@ -8,6 +8,8 @@
 using std::cout;
 using std::endl;
 
+dDPM *Tools::unit;
+
 double *Tools::x6j;
 double *Tools::x9j;
 
@@ -46,6 +48,23 @@ void Tools::init(int L_in,int N_in){
 }
 
 /**
+ * This needs a separate function because I'm stupid
+ */
+void Tools::sunit(){
+
+   unit = new dDPM();
+
+   *unit = 0.0;
+
+   for(int S = 0;S < 2;++S)
+      for(int i = 0;i < unit->gdim(S);++i)
+         (*unit)(S,i,i) = 1.0;
+
+   unit->proj_W();
+
+}
+
+/**
  * deallocate the static lists and objects
  */
 void Tools::clear(){
@@ -53,6 +72,8 @@ void Tools::clear(){
    delete [] x6j;
 
    delete [] x9j;
+
+   delete unit;
 
 }
 
@@ -120,5 +141,14 @@ int Tools::shift(int a,int b){
 int Tools::par(int a){
 
    return (L - a)%L;
+
+}
+
+/**
+ * @return the projected unit matrix
+ */
+dDPM &Tools::gunit(){
+
+   return *unit;
 
 }

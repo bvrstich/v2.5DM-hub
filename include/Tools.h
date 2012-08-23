@@ -31,6 +31,10 @@ class Tools{
 
       static int par(int a);
 
+      static void sunit();
+
+      static dDPM &gunit();
+
    private:
 
       //!array in which I store 6j symbols needed
@@ -38,6 +42,9 @@ class Tools{
 
       //!array in which I store 9j symbols needed
       static double *x9j;
+
+      //!the projected unit matrix
+      static dDPM *unit;
 
       //!nr of sites
       static int L;

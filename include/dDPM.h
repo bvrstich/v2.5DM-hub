@@ -8,6 +8,8 @@ using std::ostream;
 
 #include "rxTPM.h"
 
+class SUP;
+
 /**
  * @author Brecht Verstichel
  * @date 08-08-2012\n\n
@@ -58,6 +60,20 @@ class dDPM : public rxTPM {
       void hubbard(double);
 
       void unit();
+
+      void constr_grad(double,const dDPM &,const SUP &);
+
+      void proj_Tr();
+
+      void proj();
+
+      int solve(double,const SUP &,dDPM &);
+
+      void H(double,const dDPM &,const SUP &);
+
+      double line_search(double,SUP &,const dDPM &);
+
+      double line_search(double,const dDPM &,const dDPM &);
 
    private:
 
