@@ -42,9 +42,9 @@ int main(void){
    Tools::init(L,N);
 
    rxTPM::init();
-
    TPM::init();
    PHM::init();
+   xTPM::init();
 
    SUP::init();
    EIG::init();
@@ -139,9 +139,9 @@ int main(void){
    Tools::clear();
 
    rxTPM::clear();
-
    TPM::clear();
    PHM::clear();
+   xTPM::clear();
 
    return 0;
 

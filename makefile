@@ -22,7 +22,9 @@ CPPSRC	= pr_sdp.cpp\
             ssdTPM.cpp\
             PHM.cpp\
             xSPM.cpp\
-            dTPM.cpp
+            dTPM.cpp\
+            xTPM.cpp\
+            dPPHM.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
@@ -50,7 +52,7 @@ LDFLAGS	= -g -Wall
 # =============================================================================
 #   Targets & Rules
 # =============================================================================
-all: I1
+all: I1Q2
 
 #------------------------------------------------------------------------------
 #  Compile with only P and Q conditions activated

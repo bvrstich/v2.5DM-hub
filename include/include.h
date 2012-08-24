@@ -67,13 +67,14 @@
 
 #include "rxTPM.h"
 #include "dDPM.h"
-
 #include "SPM.h"
 #include "TPM.h"
 #include "ssdTPM.h"
 #include "PHM.h"
 #include "xSPM.h"
 #include "dTPM.h"
+#include "xTPM.h"
+#include "dPPHM.h"
 
 #include "Tools.h"
 
