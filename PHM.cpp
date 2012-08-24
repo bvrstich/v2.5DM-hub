@@ -222,3 +222,39 @@ void PHM::spinsum(double scale,const dDPM &ddpm){
    }
 
 }
+
+/** 
+ * map a dPPHM object on a PHM object by summing over the spin of elements with one index diagonal.
+ * see symmetry.pdf for more info. Watch out, not symmetrical in general!
+ * @param scale the number you scale the PHM with
+ * @param dpphm input dPPHM
+ */
+void PHM::spinsum(double scale,const dPPHM &dpphm){
+
+  int a,b,c,d;
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < this->gdim(S);++i){
+
+         a = ph2s[i][0];
+         b = ph2s[i][1];
+
+         for(int j = 0;j < this->gdim(S);++j){
+
+            c = ph2s[j][0];
+            d = ph2s[j][1];
+
+            (*this)(S,i,j) = 0.0;
+
+            //only S = 1/2 contribution
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               (*this)(S,i,j) += std::sqrt( (2.0*S_ab + 1.0) / (2.0*S + 1.0) ) * dpphm(a,0,S_ab,a,b,S,c,d);
+
+            (*this)(S,i,j) *= scale;
+
+         }
+      }
+   }
+
+}

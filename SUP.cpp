@@ -24,15 +24,15 @@ void SUP::init(){
 #endif
 
 #ifdef __Q1_CON
-   dim += 2*Tools::gl()*Tools::gl()*(2*Tools::gl() - 1);
+   dim += 2*Tools::gL()*Tools::gL()*(2*Tools::gL() - 1);
 #endif
 
 #ifdef __G1_CON
-   dim += 4*Tools::gl()*Tools::gl()*(2*Tools::gl() - 1);
+   dim += 4*Tools::gL()*Tools::gL()*(2*Tools::gL() - 1);
 #endif
 
 #ifdef __G2_CON
-   dim += 4*Tools::gl()*Tools::gl()*(2*Tools::gl() - 1);
+   dim += 4*Tools::gL()*Tools::gL()*(2*Tools::gL() - 1);
 #endif
 
 }

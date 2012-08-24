@@ -47,6 +47,8 @@ class ssdTPM : public SPM {
 
       void bar(double,const dDPM &);
 
+      void bar(double,const dPPHM &);
+
    private:
 
 };

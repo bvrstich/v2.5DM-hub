@@ -123,3 +123,49 @@ void SPM::breve(double scale,const dDPM &ddpm){
    this->symmetrize();
 
 }
+
+/**
+ * map a dPPHM matrix on a SPM by tracing the first indices together with the diagonal third (see symmetry.pdf)
+ * @param scale the SPM with this number
+ * @param dpphm input dPPHM object
+ */
+void SPM::breve(double scale,const dPPHM &dpphm){
+
+   double ward,hard;
+
+   for(int b = 0;b < Tools::gL();++b)
+      for(int d = b;d < Tools::gL();++d){
+
+         (*this)(b,d) = 0.0;
+
+         //only S = 1/2 contribution
+         for(int S_ab = 0;S_ab < 2;++S_ab)
+            for(int S_cd = 0;S_cd < 2;++S_cd){
+
+               ward = 0.0;
+
+               for(int l = 0;l < Tools::gL();++l){
+
+                  hard = dpphm(l,0,S_ab,l,b,S_cd,l,d);
+
+                  if(b == l)
+                     hard *= std::sqrt(2.0);
+
+                  if(d == l)
+                     hard *= std::sqrt(2.0);
+
+                  ward += hard;
+
+               }
+
+               (*this)(b,d) += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * ward;
+
+            }
+
+         (*this)(b,d) *= scale;
+
+      }
+
+   this->symmetrize();
+
+}

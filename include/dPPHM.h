@@ -51,7 +51,11 @@ class dPPHM : public xTPM {
 
       double ddot(const dPPHM &) const;
 
-      void I(const dDPM &ddpm);
+      void I(const dDPM &);
+
+      void Q(const dDPM &);
+
+      double barbreve() const;
 
    private:
 

@@ -46,6 +46,8 @@ class dTPM : public xSPM {
 
       void bar(double,const dDPM &);
 
+      void bar(double,const dPPHM &);
+
    private:
 
 };

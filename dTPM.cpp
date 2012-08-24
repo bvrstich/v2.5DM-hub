@@ -138,3 +138,58 @@ void dTPM::bar(double scale,const dDPM &ddpm){
    this->symmetrize();
 
 }
+
+/**
+ * special "bar" function that maps a dPPHM on a dTPM object, see notes for info.
+ * @param scale the factor you scale the dTPM with
+ * @param dpphm input dPPHM object
+ */
+void dTPM::bar(double scale,const dPPHM &dpphm){
+
+   double ward,hard;
+
+   for(int Z = 0;Z < 2;++Z){
+
+      for(int b = 0;b < Tools::gL();++b)
+         for(int d = b;d < Tools::gL();++d){
+
+            (*this)(Z,b,d) = 0.0;
+
+            for(int S = 0;S < 2;++S){
+
+               for(int S_ab = 0;S_ab < 2;++S_ab)
+                  for(int S_cd = 0;S_cd < 2;++S_cd){
+
+                     ward = 0.0;
+
+                     for(int a = 0;a < Tools::gL();++a){
+
+                        hard = dpphm(S,S_ab,a,b,S_cd,a,d);
+
+                        if(a == b)
+                           hard *= std::sqrt(2.0);
+
+                        if(a == d)
+                           hard *= std::sqrt(2.0);
+
+                        ward += hard;
+
+                     }
+
+                     (*this)(Z,b,d) += (2*(S + 0.5) + 1.0) * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * 
+
+                        Tools::g9j(S,Z,S_ab,S_cd) * ward;
+
+                  }
+
+            }
+
+            (*this)(Z,b,d) *= scale;
+
+         }
+
+   }
+
+   this->symmetrize();
+
+}

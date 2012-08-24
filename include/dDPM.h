@@ -82,6 +82,8 @@ class dDPM : public rxTPM {
 
       void I(const dPPHM &);
 
+      void Q(const dPPHM &);
+
    private:
 
 };

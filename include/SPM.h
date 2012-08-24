@@ -47,6 +47,8 @@ class SPM : public Matrix {
 
       void breve(double,const dDPM &);
 
+      void breve(double,const dPPHM &);
+
    private:
 
 };

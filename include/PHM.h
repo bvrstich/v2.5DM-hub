@@ -52,6 +52,8 @@ class PHM : public BlockMatrix {
 
       void spinsum(double,const dDPM &);
 
+      void spinsum(double,const dPPHM &);
+
       static void init();
 
       static void clear();
