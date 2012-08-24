@@ -20,19 +20,19 @@ void SUP::init(){
 #endif
 
 #ifdef __I2_CON
-   dim += 2*Tools::gL*Tools::gL*(2*Tools::gL - 1);
+   dim += 2 * Tools::gL() * Tools::gL() * (2*Tools::gL() - 1);
 #endif
 
 #ifdef __Q1_CON
-   dim += 2*Tools::gL*Tools::gL*(2*Tools::gL - 1);
+   dim += 2*Tools::gl()*Tools::gl()*(2*Tools::gl() - 1);
 #endif
 
 #ifdef __G1_CON
-   dim += 4*Tools::gL*Tools::gL*(2*Tools::gL - 1);
+   dim += 4*Tools::gl()*Tools::gl()*(2*Tools::gl() - 1);
 #endif
 
 #ifdef __G2_CON
-   dim += 4*Tools::gL*Tools::gL*(2*Tools::gL - 1);
+   dim += 4*Tools::gl()*Tools::gl()*(2*Tools::gl() - 1);
 #endif
 
 }
@@ -399,11 +399,11 @@ ostream &operator<<(ostream &output,const SUP &X_p){
 #endif
 
 #ifdef __I2_CON
-   output << (X_p.gI2()) << std::endl;
+   output << (xTPM)(X_p.gI2()) << std::endl;
 #endif
 
 #ifdef __Q1_CON
-   output << (X_p.gQ1()) << std::endl;
+   output << (xTPM)(X_p.gQ1()) << std::endl;
 #endif
 
 #ifdef __G1_CON

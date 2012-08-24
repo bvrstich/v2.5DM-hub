@@ -51,6 +51,8 @@ class dPPHM : public xTPM {
 
       double ddot(const dPPHM &) const;
 
+      void I(const dDPM &ddpm);
+
    private:
 
 };

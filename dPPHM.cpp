@@ -127,3 +127,48 @@ int dPPHM::get_inco(int S,int S_ab,int a,int b){
    }
 
 }
+
+/**
+ * map a dDPM on a dPPHM using the I2 map
+ * @param ddpm input dDPM
+ */
+void dPPHM::I(const dDPM &ddpm){
+
+   int a,b,c,d;
+
+   int S_ab,S_cd;
+
+   TPM tpm;
+   tpm.bar(1.0/(Tools::gN() - 2.0),ddpm);
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < gdim(S);++i){
+
+         S_ab = gt2s(S,i,0);
+
+         a = gt2s(S,i,1);
+         b = gt2s(S,i,2);
+
+         for(int j = i;j < gdim(S);++j){
+
+            S_cd = gt2s(S,j,0);
+
+            c = gt2s(S,j,1);
+            d = gt2s(S,j,2);
+
+            (*this)(S,i,j) = 0.0;
+
+            for(int S_ = 0;S_ < 2;++S_)
+               (*this)(S,i,j) += (2* (S_ + 0.5) + 1.0) * Tools::g6j(S,S_,S_ab,S_cd) * ddpm(S_,S_ab,a,b,S_cd,c,d);
+
+            if(S_ab == S_cd)
+               (*this)(S,i,j) += tpm(S_ab,a,b,c,d);
+
+         }
+      }
+   }
+
+   this->symmetrize();
+
+}

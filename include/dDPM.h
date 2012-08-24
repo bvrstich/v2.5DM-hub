@@ -9,6 +9,7 @@ using std::ostream;
 #include "rxTPM.h"
 
 class SUP;
+class dPPHM;
 
 /**
  * @author Brecht Verstichel
@@ -78,6 +79,8 @@ class dDPM : public rxTPM {
       void Q(char option,const dDPM &);
 
       double dotunit() const;
+
+      void I(const dPPHM &);
 
    private:
 
