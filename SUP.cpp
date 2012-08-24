@@ -395,7 +395,7 @@ ostream &operator<<(ostream &output,const SUP &X_p){
    output << (rxTPM)(X_p.gI1()) << std::endl;
 
 #ifdef __Q2_CON
-   output << (X_p.gQ2()) << std::endl;
+   output << (rxTPM)(X_p.gQ2()) << std::endl;
 #endif
 
 #ifdef __I2_CON

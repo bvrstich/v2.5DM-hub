@@ -52,23 +52,6 @@ int main(void){
    //make the unit matrix for the proj_Tr
    Tools::sunit();
 
-   dDPM ddpm_u;
-   ddpm_u.fill_Random();
-
-   ddpm_u.proj_W();
-
-   dDPM Q_up;
-   Q_up.Q('U',ddpm_u);
-
-   dDPM ddpm_d;
-   ddpm_d.fill_Random();
-
-   dDPM Q_down;
-   Q_down.Q('D',ddpm_d);
-
-   cout << ddpm_u.ddot(Q_down) << endl;
-   cout << ddpm_d.ddot(Q_up) << endl;
-/*
    //hamiltoniaan
    dDPM ham;
    ham.hubbard(1.0);
@@ -152,7 +135,7 @@ int main(void){
    cout << endl;
 
    cout << "Final Energy:\t" << ham.ddot(W) << endl;
-*/
+
    Tools::clear();
 
    rxTPM::clear();
