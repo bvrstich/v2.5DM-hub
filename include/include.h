@@ -76,6 +76,7 @@
 #include "xTPM.h"
 #include "dPPHM.h"
 #include "rxPHM.h"
+#include "dPHHM.h"
 
 #include "Tools.h"
 

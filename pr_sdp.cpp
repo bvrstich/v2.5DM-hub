@@ -53,10 +53,11 @@ int main(void){
    //make the unit matrix for the proj_Tr
    Tools::sunit();
 
-   rxPHM rxphm;
-   rxphm.fill_Random();
+   dPHHM dphhm;
+   dphhm.fill_Random();
 
-   cout << rxphm;
+   cout << dphhm;
+
 /*
    //hamiltoniaan
    dDPM ham;

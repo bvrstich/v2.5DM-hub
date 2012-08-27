@@ -20,13 +20,6 @@ class dPPHM;
  */
 class dDPM : public rxTPM {
 
-   /**
-    * Output stream operator overloaded
-    * @param output The stream to which you are writing (e.g. cout)
-    * @param ddpm_p the dDPM you want to print
-    */
-   friend ostream &operator<<(ostream &output,const dDPM &ddpm_p);
-
    public:
 
       //constructor
