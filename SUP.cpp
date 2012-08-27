@@ -228,7 +228,7 @@ SUP &SUP::operator=(const SUP &X_c){
  * e.g. X = 0 makes all the Matrix elements zero.
  * @param a the number
  */
-SUP &SUP::operator=(double &a){
+SUP &SUP::operator=(double a){
 
    *I1 = a;
 
@@ -734,6 +734,64 @@ void SUP::fill(const dDPM &W){
 
 #ifdef __G2_CON
    G2->G2(W);
+#endif
+
+}
+
+/**
+ * Fill the SUP matrix (*this) with the matrix in I1 as input
+ */
+void SUP::fill(){
+
+#ifdef __Q2_CON
+   Q2->Q('U',*I1);
+#endif
+
+#ifdef __I2_CON
+   I2->I(*I1);
+#endif
+
+#ifdef __Q1_CON
+   Q1->Q(*I1);
+#endif
+
+#ifdef __G1_CON
+   G1->G1(*I1);
+#endif
+
+#ifdef __G2_CON
+   G2->G2(*I1);
+#endif
+
+}
+
+/**
+ * Seperate SUP into two SUP's, a positive and negative semidefinite part.
+ * @param p positive (plus) output part
+ * @param m negative (minus) output part
+ */
+void SUP::sep_pm(SUP &p,SUP &m){
+
+   I1->sep_pm(p.gI1(),m.gI1());
+
+#ifdef __Q2_CON
+   Q2->sep_pm(p.gQ2(),m.gQ2());
+#endif
+
+#ifdef __I2_CON
+   I2->sep_pm(p.gI2(),m.gI2());
+#endif
+
+#ifdef __Q1_CON
+   Q1->sep_pm(p.gQ1(),m.gQ1());
+#endif
+
+#ifdef __G1_CON
+   G1->sep_pm(p.gG1(),m.gG1());
+#endif
+
+#ifdef __G2_CON
+   G2->sep_pm(p.gG2(),m.gG2());
 #endif
 
 }

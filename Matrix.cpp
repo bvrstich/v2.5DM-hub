@@ -480,3 +480,106 @@ void Matrix::out(const char *filename) const{
          output << i << "\t" << j << "\t" << matrix[j][i] << endl;
 
 }
+
+/**
+ * Seperate matrix into two matrices, a positive and negative semidefinite part.
+ * @param p positive (plus) output part
+ * @param m negative (minus) output part
+ */
+void Matrix::sep_pm(Matrix &p,Matrix &m){
+
+   //init:
+#ifdef __INTEL_COMPILER
+   p = 0;
+   m = *this;
+#else
+   p = *this;
+   m = 0;
+#endif
+
+   double *eigenvalues = new double [n];
+
+   //diagonalize orignal matrix:
+   char jobz = 'V';
+   char uplo = 'U';
+
+   int lwork = 3*n - 1;
+
+   double *work = new double [lwork];
+
+   int info;
+
+   dsyev_(&jobz,&uplo,&n,matrix[0],&n,eigenvalues,work,&lwork,&info);
+
+   delete [] work;
+
+#ifdef __INTEL_COMPILER
+   Matrix copy(*this);
+
+   if( eigenvalues[0] >= 0 )
+   {
+      p = m;
+      m = 0;
+      delete [] eigenvalues;
+      return;
+   }
+
+   if( eigenvalues[n-1] < 0){
+      delete [] eigenvalues;
+      return;
+   }
+
+   int i = 0;
+
+   while(i < n && eigenvalues[i] < 0.0)
+      eigenvalues[i++] = 0;
+
+   int inc = 1;
+
+   for(i = 0;i < n;++i)
+      dscal_(&n,&eigenvalues[i],matrix[i],&inc);
+
+   char transA = 'N';
+   char transB = 'T';
+
+   double alpha = 1.0;
+   double beta = 0.0;
+
+   dgemm_(&transA,&transB,&n,&n,&n,&alpha,matrix[0],&n,copy.matrix[0],&n,&beta,p.matrix[0],&n);
+
+   m -= p;
+#else
+   if( eigenvalues[0] >= 0 ){
+      delete [] eigenvalues;
+      return;
+   }
+
+   if( eigenvalues[n-1] < 0)
+   {
+      m = p;
+      p = 0;
+      delete [] eigenvalues;
+      return;
+   }
+
+   //fill the plus and minus matrix
+   int i = 0;
+
+   while(i < n && eigenvalues[i] < 0.0){
+
+      for(int j = 0;j < n;++j)
+         for(int k = j;k < n;++k)
+            m(j,k) += eigenvalues[i] * matrix[i][j] * matrix[i][k];
+
+      ++i;
+
+   }
+
+   m.symmetrize();
+
+   p -= m;
+#endif
+
+   delete [] eigenvalues;
+
+}

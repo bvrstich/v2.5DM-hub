@@ -94,6 +94,8 @@ class BlockMatrix{
 
       void symmetrize();
 
+      void sep_pm(BlockMatrix &,BlockMatrix &);
+
       void out(const char *) const;
 
    private:

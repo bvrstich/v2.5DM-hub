@@ -171,7 +171,7 @@ int main(void){
    }
 
    cout << endl;
-   cout << "Nr of particles" << "\t" << Z.gI1().trace() << endl;
+   cout << "Trace" << "\t" << Z.gI1().trace() << endl;
    cout << "Energy: " << ham_copy.ddot(Z.gI1()) << endl;
    cout << "pd gap: " << Z.ddot(X) << endl;
    cout << "dual conv: " << D_conv << endl;

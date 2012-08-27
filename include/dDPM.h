@@ -56,19 +56,9 @@ class dDPM : public rxTPM {
 
       void unit();
 
-      void constr_grad(double,const dDPM &,const SUP &);
-
       void proj_Tr();
 
       void proj();
-
-      int solve(double,const SUP &,dDPM &);
-
-      void H(double,const dDPM &,const SUP &);
-
-      double line_search(double,SUP &,const dDPM &);
-
-      double line_search(double,const dDPM &,const dDPM &);
 
       void Q(char option,const dDPM &);
 
@@ -81,6 +71,14 @@ class dDPM : public rxTPM {
       void G1(const dPHHM &);
 
       void G2(const dPHHM &);
+
+      void set_u_0();
+
+      void collaps(const SUP &);
+
+      int solve(dDPM &);
+
+      void S(const dDPM &);
 
    private:
 

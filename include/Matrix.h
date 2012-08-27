@@ -91,6 +91,8 @@ class Matrix{
 
       void L_map(const Matrix &,const Matrix &);
 
+      void sep_pm(Matrix &p,Matrix &m);
+
       void symmetrize();
 
       void out(const char*) const;
