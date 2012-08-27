@@ -8,6 +8,8 @@ using std::ostream;
 
 #include "xSPM.h"
 
+class dPHHM;
+
 /**
  * @author Brecht Verstichel
  * @date 23-08-2012\n\n
@@ -47,6 +49,12 @@ class dTPM : public xSPM {
       void bar(double,const dDPM &);
 
       void bar(double,const dPPHM &);
+
+      void bar(double,const dPHHM &);
+
+      void skew_bar(double,const dPHHM &);
+
+      void ssbar(double,const dPHHM &);
 
    private:
 

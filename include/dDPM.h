@@ -10,6 +10,7 @@ using std::ostream;
 
 class SUP;
 class dPPHM;
+class dPHHM;
 
 /**
  * @author Brecht Verstichel
@@ -76,6 +77,10 @@ class dDPM : public rxTPM {
       void I(const dPPHM &);
 
       void Q(const dPPHM &);
+
+      void G1(const dPHHM &);
+
+      void G2(const dPHHM &);
 
    private:
 

@@ -8,6 +8,8 @@ using std::ostream;
 #include "BlockMatrix.h"
 #include "TPM.h"
 
+class dPHHM;
+
 /**
  * @author Brecht Verstichel
  * @date 23-04-2010\n\n
@@ -53,6 +55,12 @@ class PHM : public BlockMatrix {
       void spinsum(double,const dDPM &);
 
       void spinsum(double,const dPPHM &);
+
+      void spinsum(double,const dPHHM &);
+
+      void bar(double,const dPHHM &);
+
+      void spinsum_si(double,const dPHHM &);
 
       static void init();
 

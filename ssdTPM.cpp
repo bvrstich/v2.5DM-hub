@@ -159,3 +159,38 @@ void ssdTPM::bar(double scale,const dPPHM &dpphm){
    this->symmetrize();
 
 }
+
+/**
+ * map a dPHHM matrix on a ssdTPM by using a spinsummed "skew-bar" function on the different blocks of a dPHHM matrix.
+ * spinsummed because the intermediate spin is not required to be diagonal, instead the usual [][] is used.
+ * BEWARE: matrix not symmetric in general!
+ * @param scale the ssdTPM with this number
+ * @param dphhm input dPHHM object
+ */
+void ssdTPM::skew_bar(double scale,const dPHHM &dphhm){
+
+   double ward;
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int c = 0;c < Tools::gL();++c){
+
+         (*this)(a,c) = 0.0;
+
+         for(int S_bl = 0;S_bl < 2;++S_bl)
+            for(int S_dl = 0;S_dl < 2;++S_dl){
+
+               ward = 0.0;
+
+               for(int b = 0;b < Tools::gL();++b)
+                  ward += dphhm(0,S_bl,b,b,S_dl,a,c);
+
+               (*this)(a,c) += (1 - 2*S_bl) * std::sqrt( (2.0*S_bl + 1.0) * (2.0*S_dl + 1.0) ) * ward;
+
+            }
+
+         //finally scale
+         (*this)(a,c) *= scale;
+
+      }
+
+}

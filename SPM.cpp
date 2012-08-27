@@ -169,3 +169,99 @@ void SPM::breve(double scale,const dPPHM &dpphm){
    this->symmetrize();
 
 }
+
+/**
+ * map a dPHHM matrix on a SPM by tracing the first indices together with the diagonal third (see symmetry.pdf)
+ * @param scale the SPM with this number
+ * @param dphhm input dPHHM object
+ */
+void SPM::breve(double scale,const dPHHM &dphhm){
+
+   double ward;
+
+   for(int b = 0;b < Tools::gL();++b)
+      for(int d = b;d < Tools::gL();++d){
+
+         (*this)(b,d) = 0.0;
+
+         //only S = 1/2 contribution
+         for(int S_ab = 0;S_ab < 2;++S_ab)
+            for(int S_cd = 0;S_cd < 2;++S_cd){
+
+               ward = 0.0;
+
+               for(int l = 0;l < Tools::gL();++l)
+                  ward += dphhm(l,0,S_ab,l,b,S_cd,l,d);
+
+               (*this)(b,d) += std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) ) * ward;
+
+            }
+
+         (*this)(b,d) *= scale;
+
+      }
+
+   this->symmetrize();
+
+}
+
+/**
+ * map a dPHHM matrix on a SPM by doing a normal double bar
+ * @param scale the SPM with this number
+ * @param dphhm input dPHHM object
+ */
+void SPM::barbar(double scale,const dPHHM &dphhm){
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int c = a;c < Tools::gL();++c){
+
+         (*this)(a,c) = 0.0;
+
+         for(int l = 0;l < Tools::gL();++l)
+            for(int S = 0;S < 2;++S)
+               for(int S_bl = 0;S_bl < 2;++S_bl)
+                  for(int b = 0;b < Tools::gL();++b)
+                     (*this)(a,c) += (2*(S + 0.5) + 1.0) * dphhm(l,S,S_bl,a,b,S_bl,c,b);
+         
+         (*this)(a,c) *= scale;
+
+      }
+
+   this->symmetrize();
+
+}
+
+/**
+ * map a dPHHM matrix on a SPM by tracing the second indices together with the diagonal third (see symmetry.pdf)
+ * this is for the G2 down, slightly different breve then for the G1 down, the trace is over the second index, so breve_si...
+ * @param scale the SPM with this number
+ * @param dphhm input dPHHM object
+ */
+void SPM::breve_si(double scale,const dPHHM &dphhm){
+
+   double ward;
+
+   for(int a = 0;a < Tools::gL();++a)
+      for(int c = a;c < Tools::gL();++c){
+
+         (*this)(a,c) = 0.0;
+
+         for(int S = 0;S < 2;++S)
+            for(int S_bl = 0;S_bl < 2;++S_bl){
+
+               ward = 0.0;
+
+               for(int l = 0;l < Tools::gL();++l)
+                  ward += dphhm(l,S,S_bl,a,l,S_bl,c,l);
+
+               (*this)(a,c) += (1 - 2*S_bl) * (2*(S + 0.5) + 1.0) * ward;
+
+            }
+
+         (*this)(a,c) *= scale;
+
+      }
+
+   this->symmetrize();
+
+}

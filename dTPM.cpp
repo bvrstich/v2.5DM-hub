@@ -193,3 +193,111 @@ void dTPM::bar(double scale,const dPPHM &dpphm){
    this->symmetrize();
 
 }
+
+/**
+ * special "bar" function that maps a dPHHM on a dTPM object, see notes for info.
+ * @param scale the factor you scale the dTPM with
+ * @param dphhm input dPHHM object
+ */
+void dTPM::bar(double scale,const dPHHM &dphhm){
+
+   for(int Z = 0;Z < 2;++Z){
+
+      for(int b = 0;b < Tools::gL();++b)
+         for(int d = b;d < Tools::gL();++d){
+
+            (*this)(Z,b,d) = 0.0;
+
+            for(int S = 0;S < 2;++S)
+               for(int a = 0;a < Tools::gL();++a)
+                  (*this)(Z,b,d) += (2*(S + 0.5) + 1.0)/(2*Z + 1.0) * dphhm(S,Z,a,b,Z,a,d);
+
+
+            (*this)(Z,b,d) *= scale;
+
+         }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * special "skew-bar" function that maps a dPHHM on a dTPM object, see notes for info.
+ * BEWARE: not symmetrical
+ * @param scale the factor you scale the dTPM with
+ * @param dphhm input dPHHM object
+ */
+void dTPM::skew_bar(double scale,const dPHHM &dphhm){
+
+   double ward;
+
+   for(int S_dl = 0;S_dl < 2;++S_dl){
+
+      for(int b = 0;b < Tools::gL();++b)
+         for(int d = 0;d < Tools::gL();++d){
+
+            (*this)(S_dl,b,d) = 0.0;
+
+            for(int S_bl = 0;S_bl < 2;++S_bl){
+
+               ward = 0.0;
+
+               for(int a = 0;a < Tools::gL();++a)
+                  ward += dphhm(0,S_bl,a,a,S_dl,b,d);
+
+               (*this)(S_dl,b,d) += std::sqrt( (2*S_bl + 1.0) / (2*S_dl + 1.0) ) * (1 - 2*S_dl) * (1 - 2*S_bl) * ward;
+
+            }
+
+            (*this)(S_dl,b,d) *= scale;
+
+         }
+
+   }
+
+}
+
+/**
+ * special spinsummed "bar" function that maps a dPHHM on a dTPM object, see notes for info.
+ * spinsummed because the intermediate spin is not required to be diagonal, and to have a different name then the other bar...
+ * @param scale the factor you scale the dTPM with
+ * @param dphhm input dPPHM object
+ */
+void dTPM::ssbar(double scale,const dPHHM &dphhm){
+
+   double ward;
+
+   for(int Z = 0;Z < 2;++Z){
+
+      for(int a = 0;a < Tools::gL();++a)
+         for(int c = a;c < Tools::gL();++c){
+
+            (*this)(Z,a,c) = 0.0;
+
+            for(int S = 0;S < 2;++S)
+               for(int S_bl = 0;S_bl < 2;++S_bl)
+                  for(int S_dl = 0;S_dl < 2;++S_dl){
+
+                     ward = 0.0;
+
+                     for(int b = 0;b < Tools::gL();++b)
+                        ward += dphhm(S,S_bl,a,b,S_dl,c,b);
+
+                     (*this)(Z,a,c) += (2.0*(S + 0.5) + 1.0) * std::sqrt( (2.0*S_bl + 1.0) * (2.0*S_dl + 1.0) ) * (1 - 2*S_bl) * (1 - 2*S_dl)
+
+                        * Tools::g9j(S,Z,S_dl,S_bl) * ward;
+
+                  }
+
+
+            (*this)(Z,a,c) *= scale;
+
+         }
+
+   }
+
+   this->symmetrize();
+
+}

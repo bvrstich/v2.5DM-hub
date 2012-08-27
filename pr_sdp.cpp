@@ -53,12 +53,6 @@ int main(void){
    //make the unit matrix for the proj_Tr
    Tools::sunit();
 
-   dPHHM dphhm;
-   dphhm.fill_Random();
-
-   cout << dphhm;
-
-/*
    //hamiltoniaan
    dDPM ham;
    ham.hubbard(1.0);
@@ -142,7 +136,7 @@ int main(void){
    cout << endl;
 
    cout << "Final Energy:\t" << ham.ddot(W) << endl;
-*/
+
    Tools::clear();
 
    rxPHM::clear();

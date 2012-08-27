@@ -258,3 +258,135 @@ void PHM::spinsum(double scale,const dPPHM &dpphm){
    }
 
 }
+
+/** 
+ * map a dPHHM object on a PHM object by summing over the spin of elements with one index diagonal.
+ * see symmetry.pdf for more info. Watch out, not symmetrical in general!
+ * @param scale the number you scale the PHM with
+ * @param dphhm input dPHHM
+ */
+void PHM::spinsum(double scale,const dPHHM &dphhm){
+
+  int a,b,c,d;
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < this->gdim(S);++i){
+
+         a = ph2s[i][0];
+         b = ph2s[i][1];
+
+         for(int j = 0;j < this->gdim(S);++j){
+
+            c = ph2s[j][0];
+            d = ph2s[j][1];
+
+            (*this)(S,i,j) = 0.0;
+
+            //only S = 1/2 contribution
+            for(int S_bl = 0;S_bl < 2;++S_bl)
+               (*this)(S,i,j) += std::sqrt( (2.0*S_bl + 1.0) / (2.0*S + 1.0) ) * dphhm(a,0,S_bl,a,b,S,c,d);
+
+            (*this)(S,i,j) *= scale;
+
+         }
+      }
+   }
+
+}
+
+/** 
+ * map a dPHHM object on a PHM object doing another special bar for the G2 down map
+ * see symmetry.pdf for more info.
+ * @param scale the number you scale the PHM with
+ * @param dphhm input dPHHM
+ */
+void PHM::bar(double scale,const dPHHM &dphhm){
+
+   double ward;
+
+   int a,b,c,d;
+
+   for(int Z = 0;Z < 2;++Z){
+
+      for(int i = 0;i < this->gdim(Z);++i){
+
+         a = ph2s[i][0];
+         b = ph2s[i][1];
+
+         for(int j = i;j < this->gdim(Z);++j){
+
+            c = ph2s[j][0];
+            d = ph2s[j][1];
+
+            (*this)(Z,i,j) = 0.0;
+
+            for(int S = 0;S < 2;++S)
+               for(int S_bl = 0;S_bl < 2;++S_bl)
+                  for(int S_dl = 0;S_dl < 2;++S_dl){
+
+                     ward = 0.0;
+
+                     for(int l = 0;l < Tools::gL();++l)
+                        ward += dphhm(l,S,S_bl,a,b,S_dl,c,d);
+
+                     (*this)(Z,i,j) += (2.0*(S + 0.5) + 1.0) * std::sqrt( (2.0*S_bl + 1.0) * (2.0*S_dl + 1.0) ) 
+
+                        * Tools::g9j(S,Z,S_dl,S_bl) * ward;
+
+                  }
+
+            (*this)(Z,i,j) *= scale;
+
+         }
+      }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/** 
+ * map a dPHHM object on a PHM object doing another spinsum, this time with the second index of the rows equal to the third
+ * WATCH OUT, not symmetrical
+ * see symmetry.pdf for more info.
+ * @param scale the number you scale the PHM with
+ * @param dphhm input dPHHM
+ */
+void PHM::spinsum_si(double scale,const dPHHM &dphhm){
+
+   int a,b,c,d;
+
+   for(int Z = 0;Z < 2;++Z){
+
+      for(int i = 0;i < this->gdim(Z);++i){
+
+         a = ph2s[i][0];
+         b = ph2s[i][1];
+
+         for(int j = 0;j < this->gdim(Z);++j){
+
+            c = ph2s[j][0];
+            d = ph2s[j][1];
+
+            (*this)(Z,i,j) = 0.0;
+
+            for(int S = 0;S < 2;++S)
+               for(int S_bl = 0;S_bl < 2;++S_bl)
+                  for(int S_dl = 0;S_dl < 2;++S_dl){
+
+                     (*this)(Z,i,j) += (2.0*(S + 0.5) + 1.0) * std::sqrt( (2.0*S_bl + 1.0) * (2.0*S_dl + 1.0) ) * (1 - 2*S_bl)
+
+                        * Tools::g9j(S,Z,S_dl,S_bl) * dphhm(b,S,S_bl,a,b,S_dl,c,d);
+
+                  }
+
+            (*this)(Z,i,j) *= scale;
+
+         }
+      }
+
+   }
+
+}

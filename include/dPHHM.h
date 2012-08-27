@@ -42,6 +42,12 @@ class dPHHM : public rxPHM {
 
       double ddot(const dPHHM &) const;
 
+      void G1(const dDPM &);
+
+      double skew_trace() const;
+
+      void G2(const dDPM &);
+
    private:
 
 };

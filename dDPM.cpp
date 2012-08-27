@@ -2554,3 +2554,243 @@ void dDPM::Q(const dPPHM &dpphm){
    this->symmetrize();
 
 }
+
+/**
+ * map a dPHHM on a dDPM object with the G1 down map.
+ * @param dphhm input dPHHM matrix
+ */
+void dDPM::G1(const dPHHM &dphhm){
+
+   int a,b,c,d;
+
+   int S_ab,S_cd;
+
+   double norm_ab,norm_cd;
+   int sign_ab,sign_cd;
+
+   dTPM bar;
+   bar.bar(1.0/(Tools::gN() - 2.0),dphhm);
+
+   SPM breve;
+   breve.breve(0.5/((Tools::gN() - 1.0)*(Tools::gN() - 2.0)),dphhm);
+
+   ssdTPM ssdtpm;
+   ssdtpm.skew_bar(0.5/((Tools::gN() - 1.0)*(Tools::gN() - 2.0)),dphhm);
+
+   double dspm = 0.5 * dphhm.skew_trace() / ((Tools::gN() - 1.0)*(Tools::gN() - 2.0));
+
+   dTPM skew_bar;
+   skew_bar.skew_bar(1.0/(Tools::gN() - 2.0),dphhm);
+
+   PHM phm;
+   phm.spinsum(1.0/(Tools::gN() - 2.0),dphhm);
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < gdim(S);++i){
+
+         S_ab = gt2s(S,i,0);
+
+         a = gt2s(S,i,1);
+         b = gt2s(S,i,2);
+
+         norm_ab = 1.0;
+
+         sign_ab = 1 - 2*S_ab;
+
+         if(a == b)
+            norm_ab /= std::sqrt(2.0);
+
+         for(int j = i;j < gdim(S);++j){
+
+            S_cd = gt2s(S,j,0);
+
+            c = gt2s(S,j,1);
+            d = gt2s(S,j,2);
+
+            norm_cd = 1.0;
+
+            sign_cd = 1 - 2*S_cd;
+
+            if(c == d)
+               norm_cd /= std::sqrt(2.0);
+
+            (*this)(S,i,j) = 0.0;
+
+            for(int S_ = 0;S_ < 2;S_++)
+               for(int S_bl = 0;S_bl < 2;++S_bl)
+                  for(int S_dl = 0;S_dl < 2;++S_dl){
+
+                     (*this)(S,i,j) += norm_ab * norm_cd * (2*(S_ + 0.5) + 1.0) 
+
+                        * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_bl + 1.0) * (2.0*S_dl + 1.0) )
+
+                        * Tools::g6j(S,0,S_dl,S_ab) * Tools::g6j(S,0,S_bl,S_cd) * Tools::g6j(S,S_,S_bl,S_dl)
+
+                        * ( dphhm(S_,S_bl,a,d,S_dl,c,b) + sign_ab * dphhm(S_,S_bl,b,d,S_dl,c,a) + sign_cd * dphhm(S_,S_bl,a,c,S_dl,d,b)
+
+                              + sign_ab * sign_cd * dphhm(S_,S_bl,b,c,S_dl,d,a) );
+
+                  }
+
+
+            if(i == j)
+               (*this)(S,i,j) += 2.0 * dspm;
+
+            if(S_ab == S_cd){
+
+               (*this)(S,i,j) -= norm_ab * norm_cd * ( phm(S_ab,a,d,c,b) + phm(S_ab,c,b,a,d) + phm(S_ab,b,c,d,a) + phm(S_ab,d,a,b,c)
+
+                     + sign_ab * ( phm(S_ab,a,c,d,b) + phm(S_ab,d,b,a,c) + phm(S_ab,b,d,c,a) + phm(S_ab,c,a,b,d) ) );
+
+               if(a == c){
+
+                  (*this)(S,i,j) += norm_ab * norm_cd * ( bar(a,S_ab,b,d) + breve(b,d) + ssdtpm(b,b,d) + ssdtpm(d,d,b)
+
+                        - skew_bar(a,S_ab,b,d) - skew_bar(a,S_ab,d,b) );
+
+               }
+
+               if(b == c){
+
+                  (*this)(S,i,j) += sign_ab * norm_ab * norm_cd * ( bar(b,S_ab,a,d) + breve(a,d) + ssdtpm(a,a,d) + ssdtpm(d,d,a)
+
+                        - skew_bar(b,S_ab,a,d) - skew_bar(b,S_ab,d,a) );
+
+               }
+
+               if(a == d){
+
+                  (*this)(S,i,j) += sign_ab * norm_ab * norm_cd * ( bar(a,S_ab,b,c) + breve(b,c) + ssdtpm(b,b,c) + ssdtpm(c,c,b)
+
+                        - skew_bar(a,S_ab,b,c) - skew_bar(a,S_ab,c,b) );
+
+               }
+
+               if(b == d){
+
+                  (*this)(S,i,j) += norm_ab * norm_cd * ( bar(b,S_ab,a,c) + breve(a,c) + ssdtpm(a,a,c) + ssdtpm(c,c,a)
+
+                        - skew_bar(b,S_ab,a,c) - skew_bar(b,S_ab,c,a) );
+
+               }
+
+            }
+
+         }
+      }
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * map a dPHHM on a dDPM object with the G2 down map.
+ * @param dphhm input dPHHM matrix
+ */
+void dDPM::G2(const dPHHM &dphhm){
+
+   SPM barbar;
+   barbar.barbar(0.5/((Tools::gN() - 1.0)*(Tools::gN() - 2.0)),dphhm);
+
+   SPM breve_si;
+   breve_si.breve_si(0.5/((Tools::gN() - 1.0)*(Tools::gN() - 2.0)),dphhm);
+
+   PHM phm;
+   phm.bar(1.0/(Tools::gN() - 2.0),dphhm);
+
+   dTPM dtpm;
+   dtpm.ssbar(1.0/(Tools::gN() - 2.0),dphhm);
+
+   PHM hat_si;
+   hat_si.spinsum_si(1.0/(Tools::gN() - 2.0),dphhm);
+
+   int a,b,c,d;
+
+   int S_ab,S_cd;
+
+   double norm_ab,norm_cd;
+   int sign_ab,sign_cd;
+
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < gdim(S);++i){
+
+         S_ab = gt2s(S,i,0);
+
+         a = gt2s(S,i,1);
+         b = gt2s(S,i,2);
+
+         norm_ab = 1.0;
+
+         sign_ab = 1 - 2*S_ab;
+
+         if(a == b)
+            norm_ab /= std::sqrt(2.0);
+
+         for(int j = i;j < gdim(S);++j){
+
+            S_cd = gt2s(S,j,0);
+
+            c = gt2s(S,j,1);
+            d = gt2s(S,j,2);
+
+            norm_cd = 1.0;
+
+            sign_cd = 1 - 2*S_cd;
+
+            if(c == d)
+               norm_cd /= std::sqrt(2.0);
+
+            (*this)(S,i,j) = 0.0;
+
+            for(int S_ = 0;S_ < 2;S_++)
+               for(int S_bl = 0;S_bl < 2;++S_bl)
+                  for(int S_dl = 0;S_dl < 2;++S_dl){
+
+                     (*this)(S,i,j) -= norm_ab * norm_cd * (2*(S_ + 0.5) + 1.0) 
+
+                        * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_cd + 1.0) * (2.0*S_bl + 1.0) * (2.0*S_dl + 1.0) )
+
+                        * Tools::g6j(S,0,S_dl,S_ab) * Tools::g6j(S,0,S_bl,S_cd) * Tools::g6j(S,S_,S_bl,S_dl)
+
+                        * ( dphhm(S_,S_bl,a,d,S_dl,c,b) + sign_ab * dphhm(S_,S_bl,b,d,S_dl,c,a) + sign_cd * dphhm(S_,S_bl,a,c,S_dl,d,b)
+
+                              + sign_ab * sign_cd * dphhm(S_,S_bl,b,c,S_dl,d,a) );
+
+                  }
+
+            if(S_ab == S_cd){
+
+               //tp_a 
+               (*this)(S,i,j) -= norm_ab * norm_cd * ( phm(S_ab,a,d,c,b) + sign_ab * phm(S_ab,a,c,d,b) + sign_ab * phm(S_ab,b,d,c,a) + phm(S_ab,b,c,d,a) );
+
+               //tp_b and tp_c
+               (*this)(S,i,j) -= norm_ab * norm_cd * ( hat_si(S_ab,a,d,c,b) + sign_ab * hat_si(S_ab,b,d,c,a) 
+               
+                     + sign_ab * hat_si(S_ab,a,c,d,b) + hat_si(S_ab,b,c,d,a) + hat_si(S_ab,c,b,a,d) + sign_ab * hat_si(S_ab,c,a,b,d) 
+                     
+                     + sign_ab * hat_si(S_ab,d,b,a,c) + hat_si(S_ab,d,a,b,c) );
+
+               if(b == d)
+                  (*this)(S,i,j) += norm_ab * norm_cd * ( barbar(a,c) + breve_si(a,c) - dtpm(b,S_ab,a,c) );
+
+               if(a == d)
+                  (*this)(S,i,j) += sign_ab * norm_ab * norm_cd * ( barbar(b,c) + breve_si(b,c) - dtpm(a,S_ab,b,c) );
+
+               if(b == c)
+                  (*this)(S,i,j) += sign_ab * norm_ab * norm_cd * ( barbar(a,d) + breve_si(a,d) - dtpm(b,S_ab,a,d) );
+
+               if(a == c)
+                  (*this)(S,i,j) += norm_ab * norm_cd * ( barbar(b,d) + breve_si(b,d) - dtpm(a,S_ab,b,d) );
+
+            }
+
+         }
+      }
+   }
+
+   this->symmetrize();
+
+}
