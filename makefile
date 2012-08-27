@@ -24,7 +24,8 @@ CPPSRC	= pr_sdp.cpp\
             xSPM.cpp\
             dTPM.cpp\
             xTPM.cpp\
-            dPPHM.cpp
+            dPPHM.cpp\
+            rxPHM.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)
 
