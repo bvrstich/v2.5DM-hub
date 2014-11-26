@@ -36,8 +36,8 @@ int main(void){
 
    cout.precision(10);
 
-   const int L = 6;//nr of sites;
-   const int N = 6;//nr of particles
+   const int L = 4;//nr of sites;
+   const int N = 4;//nr of particles
 
    Tools::init(L,N);
 
@@ -94,7 +94,7 @@ int main(void){
    double D_conv(1.0),P_conv(1.0),convergence(1.0);
 
    // mazziotti uses 1.6 for this
-   double mazzy = 1.6;
+   double mazzy = 2.0;
 
    int iter;
    int max_iter = 1;
@@ -176,6 +176,8 @@ int main(void){
    cout << "pd gap: " << Z.ddot(X) << endl;
    cout << "dual conv: " << D_conv << endl;
    cout << "primal conv: " << P_conv << endl;
+
+   cout << Z.gI1() << endl;
 
    Tools::clear();
 
